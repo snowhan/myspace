@@ -1,0 +1,15 @@
+﻿{
+"res":{
+	"soldier0000": {"x":0,"y":0,"w":33,"h":70},
+	"soldier0001": {"x":33,"y":0,"w":35,"h":70}
+},
+"frames": {
+	"soldier": {
+		"totalFrame": 2,
+		"childrenFrame": [
+			{"res":"soldier0000","x":0,"y":0},
+			{"res":"soldier0001","x":0,"y":0}
+		]
+	}
+}
+}

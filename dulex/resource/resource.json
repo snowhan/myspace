@@ -1,0 +1,44 @@
+{
+"resources":
+	[
+		{"name":"bg","type":"image","url":"bg.png"},
+		{"name":"start_bg","type":"image","url":"start_bg.png"},
+
+		{"name":"blast","type":"image","url":"blast.png"},
+		{"name":"pauseBtn","type":"image","url":"btn_pause.png"},
+		{"name":"moreBtn","type":"image","url":"btn_more.png"},
+		{"name":"number","type":"font","url":"number.fnt"},
+
+		{"name":"pauseBg","type":"image","url":"pause_bg.png"},
+		{"name":"homeBtn","type":"image","url":"home.png"},
+		{"name":"resumeBtn","type":"image","url":"goon.png"},
+		{"name":"replayBtn","type":"image","url":"replay.png"},
+		{"name":"winBg","type":"image","url":"win_bg.png"},
+	  {"name":"b1","type":"image","url":"b1.png"},
+
+
+
+	  {"name":"bullet","type":"image","url":"bullet.png"},
+	  {"name":"missile","type":"image","url":"missile.png"},
+	  {"name":"soldier","type":"image","url":"soldier.png"},
+	  {"name":"soldierJson","type":"json","url":"soldierJson.json"},
+	  {"name":"bz","type":"image","url":"bz.png"},
+	  {"name":"font1","type":"font","url":"font/font1.fnt"},
+	  {"name":"gameOverBg","type":"image","url":"gameOverBg.png"},
+	  {"name":"gameOverReplay","type":"image","url":"gameOverReplay.png"},
+	  {"name":"gameOverShare","type":"image","url":"gameOverShare.png"},
+	  {"name":"level1","type":"image","url":"level1.png"},
+	  {"name":"level2","type":"image","url":"level2.png"},
+	  {"name":"level3","type":"image","url":"level3.png"},
+	  {"name":"bzjson","type":"json","url":"bzJson.json"},
+
+
+	  {"name":"paodao","type":"image","url":"paodao.png"},
+	  {"name":"paodaojson","type":"json","url":"paodaojson.json"}
+	],
+
+"groups":
+	[
+        {"name":"preload","keys":"paodao,paodaojson,  level3,level2,level1,b1,gameOverShare,gameOverReplay,gameOverBg,font1,missile,bz,bzjson,soldierJson,soldier,bullet,    pauseBg,homeBtn,resumeBtn,replayBtn,pauseBtn,moreBtn,number,start_bg,blast,bg,"}
+	]
+}
