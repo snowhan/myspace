@@ -47,7 +47,7 @@ class Main extends egret.DisplayObjectContainer {
         //初始化Resource资源加载库
         RES.addEventListener(RES.ResourceEvent.CONFIG_COMPLETE, this.onConfigComplete, this);
         if(Main.isFpsTrue == 1){
-            RES.loadConfig("resource/resource.json", window['resourceCDN'] + "resource/assets/640/");
+            RES.loadConfig("resource/resource.json", window['resourceCDN'] + "resource/assets/750/");
             Main.isFpsTrueNumber = 1;
         }else{
             RES.loadConfig("resource/resource.json", window['resourceCDN'] + "resource/assets/360/");

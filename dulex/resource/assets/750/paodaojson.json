@@ -1,0 +1,15 @@
+﻿{
+"res":{
+	"paodao0000": {"x":0,"y":0,"w":750,"h":663},
+	"paodao0001": {"x":0,"y":663,"w":750,"h":663}
+},
+"frames": {
+	"paodao": {
+		"totalFrame": 2,
+		"childrenFrame": [
+			{"res":"paodao0000","x":-375,"y":-331.5},
+			{"res":"paodao0001","x":-375,"y":-331.5}
+		]
+	}
+}
+}

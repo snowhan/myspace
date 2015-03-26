@@ -6,6 +6,8 @@ class GameContainer extends egret.DisplayObjectContainer{
 	/*游戏界面宽高*/
 	private stageW:number;
 	private stageH:number;
+	private a:number = 0.5;
+	private v:number = 1;
 	///*暂停按钮和面板*/
 	//private pauseBtn:egret.Bitmap;
 	//private pausePanel:PausePanel;
@@ -22,17 +24,16 @@ class GameContainer extends egret.DisplayObjectContainer{
 	private rightShape:egret.Shape;
 	/*玩家*/
 	private player:Player;
-	/*玩家发射的武器*/
-	private bullets:Bullet[] = [];
+
 
 	//private missiles:Missile[] = [];
 	/*皇军*/
 	private enemys:Enemy[] = [];
-	private enemyTimer:egret.Timer = new egret.Timer(10000);
+	private enemyTimer:egret.Timer = new egret.Timer(1500);
+	private enemyRunTimer:egret.Timer = new egret.Timer(100);
 	//private missileTimer:egret.Timer = new egret.Timer(10000);
 
-	/*皇军1发射的子弹*/
-	private a1Bullets:Bullet[] = [];
+
 	private bg:egret.MovieClip;
 
 	//private lastX:number;
@@ -81,7 +82,8 @@ class GameContainer extends egret.DisplayObjectContainer{
 		this.score = 0;
 		this.lastTime = egret.getTimer();
 		this.player.fireTimer.delay = 100;
-		this.enemyTimer.delay = 500;
+		this.enemyTimer.delay = 2000;
+		this.enemyRunTimer.delay = 100;
 		//if(!this.missiles)
 		//	this.missileTimer = new egret.Timer(10000);
 		//this.missileTimer.delay = 500;
@@ -89,6 +91,7 @@ class GameContainer extends egret.DisplayObjectContainer{
 		//this.a1BulletTimer.delay = 20000;
 		this.player.fire();
 		this.enemyTimer.start();
+		this.enemyRunTimer.start();
 		//this.missileTimer.start();
 		//this.missileTimer();
 
@@ -105,10 +108,12 @@ class GameContainer extends egret.DisplayObjectContainer{
 		var mc = new egret.MovieClip(data,texture);//创建MovieClip
 		mc.scaleX = 1 * Main.isFpsTrueNumber;
 		mc.scaleY = 1 * Main.isFpsTrueNumber;
-		mc.x = this.stageW/2;
-		mc.y = this.stageH - mc.height/2;
+
 		//this.addChild(mc);//添加到显示列表，显示影片剪辑
 		mc.frameRate = 5;//设置动画的帧频
+		mc.x = this.stageW/2;
+		//mc.y = 400;
+		mc.y = this.stageH - 663/2;
 		//mc.scaleX = mc.scaleY = 0.2;
 		//this.boomMovie = mc;
 		this.addChild(mc);
@@ -137,8 +142,8 @@ class GameContainer extends egret.DisplayObjectContainer{
 
 
 		this.player = new Player();
-		this.player.x = (this.stageW - this.player.width)/2;
-		this.player.y = this.stageH - this.player.height;
+		this.player.x = 370;
+		this.player.y = this.stageH - 300;
 		this.player.touchEnabled = true;
 		this.addChild(this.player);
 		this.touchEnabled=true;
@@ -159,14 +164,15 @@ class GameContainer extends egret.DisplayObjectContainer{
 		//this.addChild(this.scoreText);
 		//this.scoreText.text = "0";
 
-        this.addEventListener(egret.Event.ENTER_FRAME,this.gameViewUpdate,this);
+        //this.addEventListener(egret.Event.ENTER_FRAME,this.gameViewUpdate,this);
 		this.leftShape.addEventListener(egret.TouchEvent.TOUCH_TAP, this.leftTouch, this);
 		this.rightShape.addEventListener(egret.TouchEvent.TOUCH_TAP, this.rightTouch, this);
         //this.addEventListener(egret.TouchEvent.TOUCH_BEGIN,this.touchHandler,this);
         //this.addEventListener(egret.TouchEvent.TOUCH_MOVE,this.touchHandler,this);
-        this.player.addEventListener(GameUtil.GAME_EVENT_CREATE_BULLET, this.createBullets, this);
+        //this.player.addEventListener(GameUtil.GAME_EVENT_CREATE_BULLET, this.createBullets, this);
         this.player.addEventListener(GameUtil.GAME_EVENT_PLAYER_DIE, this.gameOver, this);
         this.enemyTimer.addEventListener(egret.TimerEvent.TIMER, this.generateEnemys, this);
+		this.enemyRunTimer.addEventListener(egret.TimerEvent.TIMER, this.gameViewUpdate, this);
 		//this.missileTimer.addEventListener(egret.TimerEvent.TIMER, this.createMissile, this);
         //this.superBulletTimer.addEventListener(egret.TimerEvent.TIMER, this.createSuperBullet, this);
 	}
@@ -219,21 +225,21 @@ class GameContainer extends egret.DisplayObjectContainer{
 	private rightTouchEvent(){
 		//this.player.rightMove();
 		var tw = egret.Tween.get(this.player, { loop: false });
-		tw.to({ x: 460* Main.isFpsTrueNumber}, 300);
+		tw.to({ x: 650* Main.isFpsTrueNumber}, 300);
 		//tw.call(this.player.normalMove);
 	}
 
 	private middleTouchEvent(){
 		//this.player.rightMove();
 		var tw = egret.Tween.get(this.player, { loop: false });
-		tw.to({ x: 300* Main.isFpsTrueNumber}, 300);
+		tw.to({ x: 370* Main.isFpsTrueNumber}, 300);
 		//tw.call(this.player.normalMove);
 	}
 
 	private leftTouchEvent(){
 		//this.player.leftMove();
 		var tw = egret.Tween.get(this.player, { loop: false });
-		tw.to({ x: 125* Main.isFpsTrueNumber}, 300);
+		tw.to({ x: 80* Main.isFpsTrueNumber}, 370);
 		//tw.call(this.player.normalMove);
 	}
 
@@ -298,15 +304,15 @@ class GameContainer extends egret.DisplayObjectContainer{
 
 
 	/*发射子弹*/
-	private createBullets():void{
-		var bullet:Bullet;
-		bullet = Bullet.produce('bullet');
-		bullet.scaleY *= -1;
-		bullet.x = this.player.x + (this.player.width - bullet.width)/2 + 10 * Main.isFpsTrueNumber;
-		bullet.y = this.player.y;
-		this.addChildAt(bullet,this.numChildren-1-this.enemys.length);
-		this.bullets.push(bullet);
-	}
+	//private createBullets():void{
+	//	var bullet:Bullet;
+	//	bullet = Bullet.produce('bullet');
+	//	bullet.scaleY *= -1;
+	//	bullet.x = this.player.x + (this.player.width - bullet.width)/2 + 10 * Main.isFpsTrueNumber;
+	//	bullet.y = this.player.y;
+	//	this.addChildAt(bullet,this.numChildren-1-this.enemys.length);
+	//	this.bullets.push(bullet);
+	//}
 
 	/*皇军1发射子弹*/
 	//private createA1Bullets():void{
@@ -332,31 +338,41 @@ class GameContainer extends egret.DisplayObjectContainer{
 
 	/*生成三姑六婆*/
 	private generateEnemys(){
-		var enemy:Enemy = Enemy.produce(Enemy.typeArr[0]);
-        enemy.x = Math.random()*(this.stageW-enemy.width);
+		var enemy:Enemy = Enemy.produce(Enemy.typeArr[Enemy.typeArr[Math.floor(Math.random()*3)]]);
+		if(enemy.enemyPosition == "left"){
+			enemy.x = 360;
+		}else if(enemy.enemyPosition == "middle"){
+			enemy.x = 350;
+		}else{
+			enemy.x = 370;
+		}
 
 		//enemy.x = 100;
         //enemy.y = -enemy.height-Math.random()*300;
-		enemy.y = -enemy.height;
+		enemy.y = 680;
         this.addChildAt(enemy,this.numChildren-1);
         this.enemys.push(enemy);
 
-		enemy.addEventListener(GameUtil.GAME_EVENT_JAPAN_CREATE_BULLET,this.createBulletHandler, this);
-		enemy.fireTimer.delay = 1000;
-		enemy.fire();
+		//enemy.addEventListener(GameUtil.GAME_EVENT_JAPAN_CREATE_BULLET,this.createBulletHandler, this);
+		//enemy.fireTimer.delay = 1000;
+		//enemy.fire();
 	}
+
+	//private enemyRunEvent(){
+	//	this.gameViewUpdate(event:egret.Event);
+	//}
 
 
 	/**创建子弹(皇军的子弹)*/
-	private createBulletHandler(evt:egret.Event):void{
-		var a1bullet:Bullet;
-		var theFighter:Enemy = evt.target;
-		a1bullet = Bullet.produce('bullet');
-		a1bullet.x = theFighter.x + 7 * Main.isFpsTrueNumber;
-		a1bullet.y = theFighter.y+55 * Main.isFpsTrueNumber;
-		this.addChildAt(a1bullet,this.numChildren-1-this.enemys.length);
-		this.a1Bullets.push(a1bullet);
-	}
+	//private createBulletHandler(evt:egret.Event):void{
+	//	var a1bullet:Bullet;
+	//	var theFighter:Enemy = evt.target;
+	//	a1bullet = Bullet.produce('bullet');
+	//	a1bullet.x = theFighter.x + 7 * Main.isFpsTrueNumber;
+	//	a1bullet.y = theFighter.y+55 * Main.isFpsTrueNumber;
+	//	this.addChildAt(a1bullet,this.numChildren-1-this.enemys.length);
+	//	this.a1Bullets.push(a1bullet);
+	//}
 
 
 	///*生成超级子弹*/
@@ -373,43 +389,43 @@ class GameContainer extends egret.DisplayObjectContainer{
         var speedOffset:number = 60/fps;
         var len:number;
         var i:number;
-        len = this.bullets.length;
+        //len = this.bullets.length;
         var delArr:any[] = [];
-        //子弹的移动
-        var bullet:Bullet;
-		var a1bullet:Bullet;
-		//var missile:Missile;
-        for(i=0;i<len;i++){
-            bullet = this.bullets[i];
-            bullet.y -= 15*speedOffset * Main.isFpsTrueNumber;
-            if(bullet.y<-bullet.height){
-                delArr.push(bullet);
-            }
-        }
-        for(i=0;i<delArr.length;i++){
-            bullet = delArr[i];
-            this.removeChild(bullet);
-            Bullet.reclaim(bullet,bullet.textureName);
-            this.bullets.splice(this.bullets.indexOf(bullet),1);
-        }
-        delArr = [];
+        ////子弹的移动
+        //var bullet:Bullet;
+        //var a1bullet:Bullet;
+        ////var missile:Missile;
+        //for(i=0;i<len;i++){
+        //    bullet = this.bullets[i];
+        //    bullet.y -= 15*speedOffset * Main.isFpsTrueNumber;
+        //    if(bullet.y<-bullet.height){
+        //        delArr.push(bullet);
+        //    }
+        //}
+        //for(i=0;i<delArr.length;i++){
+        //    bullet = delArr[i];
+        //    this.removeChild(bullet);
+        //    Bullet.reclaim(bullet,bullet.textureName);
+        //    this.bullets.splice(this.bullets.indexOf(bullet),1);
+        //}
+        //delArr = [];
 
 
 
-		for(i=0;i<this.a1Bullets.length;i++){
-			a1bullet = this.a1Bullets[i];
-			a1bullet.y += 7*speedOffset * Main.isFpsTrueNumber;
-			if(a1bullet.y>this.stageH + a1bullet.height){
-				delArr.push(a1bullet);
-			}
-		}
-		for(i=0;i<delArr.length;i++){
-			a1bullet = delArr[i];
-			this.removeChild(a1bullet);
-			Bullet.reclaim(a1bullet,a1bullet.textureName);
-			this.a1Bullets.splice(this.a1Bullets.indexOf(a1bullet),1);
-		}
-		delArr = [];
+		//for(i=0;i<this.a1Bullets.length;i++){
+		//	a1bullet = this.a1Bullets[i];
+		//	a1bullet.y += 7*speedOffset * Main.isFpsTrueNumber;
+		//	if(a1bullet.y>this.stageH + a1bullet.height){
+		//		delArr.push(a1bullet);
+		//	}
+		//}
+		//for(i=0;i<delArr.length;i++){
+		//	a1bullet = delArr[i];
+		//	this.removeChild(a1bullet);
+		//	Bullet.reclaim(a1bullet,a1bullet.textureName);
+		//	this.a1Bullets.splice(this.a1Bullets.indexOf(a1bullet),1);
+		//}
+		//delArr = [];
 
 
 
@@ -438,14 +454,23 @@ class GameContainer extends egret.DisplayObjectContainer{
         len = this.enemys.length;
         for(i=0;i<len;i++){
             enemy = this.enemys[i];
-            enemy.y += enemy.speed*speedOffset;
+
+
+			if(enemy.enemyPosition == "left"){
+				this.enemyLeftRun(enemy)
+			}else if(enemy.enemyPosition == "middle"){
+				enemy.y += enemy.speed*speedOffset;
+			}else{
+				enemy.y += enemy.speed*speedOffset;
+			}
+
             if(enemy.y>this.stageH){
                 delArr.push(enemy);
             }
         }
         for(i=0;i<delArr.length;i++){
             enemy = delArr[i];
-			enemy.stopFire();
+			//enemy.stopFire();
             this.removeChild(enemy);
             Enemy.reclaim(enemy,enemy.type);
             this.enemys.splice(this.enemys.indexOf(enemy),1);
@@ -464,69 +489,69 @@ class GameContainer extends egret.DisplayObjectContainer{
 	/*碰撞检测*/
 	private gameHitTest(){
 		var i:number,j:number;
-        var bullet:Bullet;
+        //var bullet:Bullet;
         var enemy:Enemy;
 		//var missile:Missile;
-		var a1bullet:Bullet;
-        var bulletsCount:number = this.bullets.length;
+		//var a1bullet:Bullet;
+        //var bulletsCount:number = this.bullets.length;
         var enemysCount:number = this.enemys.length;
 		//var missileCount:number = this.missiles.length;
-		var a1bulletCount:number = this.a1Bullets.length;
+		//var a1bulletCount:number = this.a1Bullets.length;
 
         //将需消失的子弹和皇军记录
-        var delBullets:Bullet[] = [];
+        //var delBullets:Bullet[] = [];
         var delEnemys:Enemy[] = [];
 		//var delmissiles:Missile[] = [];
-		var dela1Bullet:Bullet[] = [];
+		//var dela1Bullet:Bullet[] = [];
         //我的子弹可以消灭皇军
-        for(i=0;i<bulletsCount;i++) {
-            bullet = this.bullets[i];
-            for(j=0;j<enemysCount;j++) {
-                enemy = this.enemys[j];
-                if(enemy.y>-enemy.height){
-	                if(GameUtil.hitTest(enemy,bullet)) {
-	                    enemy.onAttacked();
-	                    if(delBullets.indexOf(bullet)==-1){
-	                        delBullets.push(bullet);
-	                    }
-	                    if(enemy.blood<=0 && delEnemys.indexOf(enemy)==-1){
-	                        delEnemys.push(enemy);
-	                    }
-	                }
-	            }
-            }
-        }
+        //for(i=0;i<bulletsCount;i++) {
+        //    bullet = this.bullets[i];
+        //    for(j=0;j<enemysCount;j++) {
+        //        enemy = this.enemys[j];
+        //        if(enemy.y>-enemy.height){
+	     //           if(GameUtil.hitTest(enemy,bullet)) {
+	     //               enemy.onAttacked();
+	     //               //if(delBullets.indexOf(bullet)==-1){
+	     //               //    delBullets.push(bullet);
+	     //               //}
+	     //               if(enemy.blood<=0 && delEnemys.indexOf(enemy)==-1){
+	     //                   delEnemys.push(enemy);
+	     //               }
+	     //           }
+	     //       }
+        //    }
+        //}
         this.addScore(delEnemys.length);
 		//皇军的子弹可以消灭我
-		for(i=0;i<a1bulletCount;i++) {
-			a1bullet = this.a1Bullets[i];
-			for(j=0;j<a1bulletCount;j++) {
-				a1bullet = this.a1Bullets[j];
-				if(a1bullet.y>-a1bullet.height){
-					if(GameUtil.hitTest(a1bullet,this.player)) {
-						this.player.onAttacked();
-						if(dela1Bullet.indexOf(a1bullet)==-1){
-							dela1Bullet.push(a1bullet);
-						}
-					}
-				}
-			}
-		}
+		//for(i=0;i<a1bulletCount;i++) {
+		//	a1bullet = this.a1Bullets[i];
+		//	for(j=0;j<a1bulletCount;j++) {
+		//		a1bullet = this.a1Bullets[j];
+		//		if(a1bullet.y>-a1bullet.height){
+		//			if(GameUtil.hitTest(a1bullet,this.player)) {
+		//				this.player.onAttacked();
+		//				if(dela1Bullet.indexOf(a1bullet)==-1){
+		//					dela1Bullet.push(a1bullet);
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
 
 
 
         //三姑六婆的撞击可以消灭我
         for(i=0;i<enemysCount;i++){
             enemy = this.enemys[i];
-            if(GameUtil.hitTest(enemy,this.player)){
-                this.player.onAttacked();
-                delEnemys.push(enemy);
-                for(j=0;j<enemysCount;j++){
-                	if(this.enemys[j].y>-enemy.height&&delEnemys.indexOf(this.enemys[j])==-1){
-                		delEnemys.push(this.enemys[j]);
-                	}
-                }
-            }
+            //if(GameUtil.hitTest(enemy,this.player)){
+            //    this.player.onAttacked();
+            //    delEnemys.push(enemy);
+            //    for(j=0;j<enemysCount;j++){
+            //    	if(this.enemys[j].y>-enemy.height&&delEnemys.indexOf(this.enemys[j])==-1){
+            //    		delEnemys.push(this.enemys[j]);
+            //    	}
+            //    }
+            //}
         }
 
 		//炸弹可以炸死我
@@ -538,12 +563,12 @@ class GameContainer extends egret.DisplayObjectContainer{
 		//	}
 		//}
 
-        while(delBullets.length>0){
-            bullet = delBullets.pop();
-            this.removeChild(bullet);
-            this.bullets.splice(this.bullets.indexOf(bullet),1);
-            Bullet.reclaim(bullet,bullet.textureName);
-        }
+        //while(delBullets.length>0){
+        //    bullet = delBullets.pop();
+        //    this.removeChild(bullet);
+        //    this.bullets.splice(this.bullets.indexOf(bullet),1);
+        //    Bullet.reclaim(bullet,bullet.textureName);
+        //}
 
 		//while(delmissiles.length>0){
 		//	missile = delmissiles.pop();
@@ -555,7 +580,7 @@ class GameContainer extends egret.DisplayObjectContainer{
         while(delEnemys.length>0) {
             enemy = delEnemys.pop();
             this.enemys.splice(this.enemys.indexOf(enemy),1);
-			enemy.stopFire();
+			//enemy.stopFire();
             enemy.die();
             this.player.onEnemyDie();
         }
@@ -567,36 +592,49 @@ class GameContainer extends egret.DisplayObjectContainer{
         //}
         
 	}
+
+	private enemyLeftRun(enemyObj){
+
+		//this.v += this.a;
+		enemyObj.y += 3;
+		enemyObj.x -= 7;
+		enemyObj.scaleY += 0.02;
+		enemyObj.scaleX += 0.02
+	}
+
+
+
+
 	/*添加分数*/
 	private addScore(value:number){
 		this.score += value;
 		//this.scoreText.text = ''+this.score;
-		if(this.score>100){
-			this.enemyTimer.delay = 300;
-			//this.missileTimer.delay = 100;
-			//this.player.fireTimer.delay = 150;
-			//this.superBulletTimer.delay = 12000;
-		}else if(this.score>50){
-			this.enemyTimer.delay = 300;
-			//this.missileTimer.delay = 300;
-			//this.player.fireTimer.delay = 200;
-			//this.superBulletTimer.delay = 15000;
-		}else if(this.score>30){
-			this.enemyTimer.delay = 400;
-			//this.missileTimer.delay = 400;
-			//this.player.fireTimer.delay = 250;
-		}else if(this.score>20){
-			this.enemyTimer.delay = 500;
-			//this.missileTimer.delay = 500;
-		}else{
-			this.enemyTimer.delay = 600;
-			//this.missileTimer.delay = 600;
-		}
+		//if(this.score>100){
+		//	this.enemyTimer.delay = 300;
+		//	//this.missileTimer.delay = 100;
+		//	//this.player.fireTimer.delay = 150;
+		//	//this.superBulletTimer.delay = 12000;
+		//}else if(this.score>50){
+		//	this.enemyTimer.delay = 300;
+		//	//this.missileTimer.delay = 300;
+		//	//this.player.fireTimer.delay = 200;
+		//	//this.superBulletTimer.delay = 15000;
+		//}else if(this.score>30){
+		//	this.enemyTimer.delay = 400;
+		//	//this.missileTimer.delay = 400;
+		//	//this.player.fireTimer.delay = 250;
+		//}else if(this.score>20){
+		//	this.enemyTimer.delay = 500;
+		//	//this.missileTimer.delay = 500;
+		//}else{
+		//	this.enemyTimer.delay = 600;
+		//	//this.missileTimer.delay = 600;
+		//}
 	}
 	private deleteDatas(){
-		while(this.bullets.length>0){
-			this.bullets.pop();
-		}
+		//while(this.bullets.length>0){
+		//	this.bullets.pop();
+		//}
 		while(this.enemys.length>0){
 			this.enemys.pop();
 		}
@@ -632,12 +670,12 @@ class GameContainer extends egret.DisplayObjectContainer{
 	/*重新开始游戏*/
 	private gameRestart():void{
 		this.removeAllListeners();
-		this.bullets = [];
+		//this.bullets = [];
 		//this.missiles = [];
 		/*皇军*/
 		this.enemys = [];
 		/*皇军1发射的子弹*/
-		this.a1Bullets = [];
+		//this.a1Bullets = [];
 		this.removeChildren();
 		this.startGame();
 		window['cb_restart']();
@@ -648,7 +686,7 @@ class GameContainer extends egret.DisplayObjectContainer{
 		utils.storeBestScore(this.score);
 		this.removeAllListeners();
 		for(var i=0;i<this.enemys.length;i++){
-			this.enemys[i].removeEventListener(GameUtil.GAME_EVENT_JAPAN_CREATE_BULLET,this.createBulletHandler, this);
+			//this.enemys[i].removeEventListener(GameUtil.GAME_EVENT_JAPAN_CREATE_BULLET,this.createBulletHandler, this);
 		}
 		if(!this.gameOverPanel){
 			this.gameOverPanel = new GameOverPanel(this.stageW, this.stageH);
@@ -673,23 +711,25 @@ class GameContainer extends egret.DisplayObjectContainer{
 		}
 	}
 	private addAllListeners(){
-		this.addEventListener(egret.Event.ENTER_FRAME,this.gameViewUpdate,this);
+		//this.addEventListener(egret.Event.ENTER_FRAME,this.gameViewUpdate,this);
         //this.addEventListener(egret.TouchEvent.TOUCH_BEGIN,this.touchHandler,this);
         //this.addEventListener(egret.TouchEvent.TOUCH_MOVE,this.touchHandler,this);
         //this.addEventListener(egret.TouchEvent.TOUCH_END,this.touchHandler,this);
-        this.player.addEventListener(GameUtil.GAME_EVENT_CREATE_BULLET, this.createBullets, this);
+        //this.player.addEventListener(GameUtil.GAME_EVENT_CREATE_BULLET, this.createBullets, this);
         this.player.addEventListener(GameUtil.GAME_EVENT_PLAYER_DIE, this.gameOver, this);
         this.enemyTimer.addEventListener(egret.TimerEvent.TIMER, this.generateEnemys, this);
+		this.enemyRunTimer.addEventListener(egret.TimerEvent.TIMER, this.gameViewUpdate, this);
 		//this.missileTimer.addEventListener(egret.TimerEvent.TIMER, this.createMissile, this);
 	}
 	private removeAllListeners(){
-		this.removeEventListener(egret.Event.ENTER_FRAME,this.gameViewUpdate,this);
+		//this.removeEventListener(egret.Event.ENTER_FRAME,this.gameViewUpdate,this);
         //this.removeEventListener(egret.TouchEvent.TOUCH_BEGIN,this.touchHandler,this);
         //this.removeEventListener(egret.TouchEvent.TOUCH_MOVE,this.touchHandler,this);
         //this.removeEventListener(egret.TouchEvent.TOUCH_END,this.touchHandler,this);
-        this.player.removeEventListener(GameUtil.GAME_EVENT_CREATE_BULLET, this.createBullets, this);
+        //this.player.removeEventListener(GameUtil.GAME_EVENT_CREATE_BULLET, this.createBullets, this);
         this.player.removeEventListener(GameUtil.GAME_EVENT_PLAYER_DIE, this.gameOver, this);
         this.enemyTimer.removeEventListener(egret.TimerEvent.TIMER, this.generateEnemys, this);
+		this.enemyRunTimer.removeEventListener(egret.TimerEvent.TIMER, this.gameViewUpdate, this);
 		//this.missileTimer.removeEventListener(egret.TimerEvent.TIMER, this.createMissile, this);
 		//this.timer.removeEventListener(egret.TimerEvent.TIMER, this.createMissile, this);
 	}
@@ -739,12 +779,12 @@ class GameContainer extends egret.DisplayObjectContainer{
 	}
 	private outerStart(){
 		this.removeAllListeners();
-		this.bullets = [];
+		//this.bullets = [];
 		//this.missiles = [];
 		/*皇军*/
 		this.enemys = [];
 		/*皇军1发射的子弹*/
-		this.a1Bullets = [];
+		//this.a1Bullets = [];
 		this.removeChildren();
 		this.initBeforeStart();
 	}

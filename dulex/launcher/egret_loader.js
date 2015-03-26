@@ -27,7 +27,7 @@
 
 egret_h5.startGame = function () {
     if (/iPhone/i.test(navigator.userAgent)){
-        startEgretGame(640,1136);
+        startEgretGame(750,1334);
         if(window.localStorage)window.localStorage.isFpsTrue = 1;
     }else{
         startEgretGame(360,567);

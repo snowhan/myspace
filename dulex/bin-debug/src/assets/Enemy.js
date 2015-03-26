@@ -11,10 +11,11 @@ var Enemy = (function (_super) {
         /**敌人生命值*/
         this.blood = 1;
         this.type = type;
+        this.anchorX = this.anchorY = 0.5;
         this.speed = Enemy.speedDict[this.type];
         this.texture = RES.getRes(this.type + "1");
-        this.fireTimer = new egret.Timer(GameConfig.ENEMY_FIRE_DELAY);
-        this.fireTimer.addEventListener(egret.TimerEvent.TIMER, this.createBullet, this);
+        this.enemyPosition = Enemy.allPosition[Math.floor(Math.random() * 3)];
+        this.scaleX = this.scaleY = 0.1;
     }
     /**生产*/
     Enemy.produce = function (type) {
@@ -23,7 +24,7 @@ var Enemy = (function (_super) {
         var dict = Enemy.cacheDict[type];
         var enemy;
         if (dict.length > 0) {
-            enemy = dict.pop();
+            enemy = dict.shift();
         }
         else {
             enemy = new Enemy(type);
@@ -41,34 +42,23 @@ var Enemy = (function (_super) {
         }
     };
     Enemy.prototype.reset = function (type) {
-        this.type = type ? type : Enemy.typeArr[0];
+        this.type = type ? type : Enemy.typeArr[Math.floor(Math.random() * 3)];
         this.speed = Enemy.speedDict[this.type];
         this.blood = 1;
-        this.texture = RES.getRes('b1');
-        //this.fireTimer = new egret.Timer(GameConfig.FIRE_DELAY);
-        //this.fireTimer.addEventListener(egret.TimerEvent.TIMER,this.createBullet,this);
+        this.texture = RES.getRes(this.type + this.blood + "");
+        this.enemyPosition = Enemy.allPosition[Math.floor(Math.random() * 3)];
+        this.scaleX = this.scaleY = 0.1;
     };
-    /**开火*/
-    Enemy.prototype.fire = function () {
-        this.fireTimer.start();
-    };
-    /**停火*/
-    Enemy.prototype.stopFire = function () {
-        this.fireTimer.stop();
-    };
-    /**创建子弹*/
-    Enemy.prototype.createBullet = function (evt) {
-        this.dispatchEventWith(GameUtil.GAME_EVENT_JAPAN_CREATE_BULLET);
-    };
-    Enemy.prototype.onAttacked = function () {
-        //if(bulletType==1){
-        this.blood--;
-        //}else{
-        //    this.blood = 0;
-        //}
-        //if(this.blood>=0){
-        //    this.texture = RES.getRes(this.type+this.blood+"");
-        //}
+    Enemy.prototype.onAttacked = function (bulletType) {
+        if (bulletType == 1) {
+            this.blood--;
+        }
+        else {
+            this.blood = 0;
+        }
+        if (this.blood >= 0) {
+            this.texture = RES.getRes(this.type + this.blood + "");
+        }
     };
     Enemy.prototype.die = function () {
         egret.setTimeout(function () {
@@ -82,8 +72,9 @@ var Enemy = (function (_super) {
         }, this, 150);
     };
     Enemy.cacheDict = {};
-    Enemy.typeArr = ["b"];
-    Enemy.speedDict = { "b": 0 };
+    Enemy.typeArr = ["a", "b", "c"];
+    Enemy.speedDict = { "a": 4.5, "b": 5, "c": 4 };
+    Enemy.allPosition = ["left", "left", "left"];
     return Enemy;
 })(egret.Bitmap);
 Enemy.prototype.__class__ = "Enemy";
