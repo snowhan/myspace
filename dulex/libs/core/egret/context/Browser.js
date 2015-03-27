@@ -34,11 +34,13 @@ var egret;
 (function (egret) {
     /**
      * 这个类是HTML5的WebWrapper的第一个版本
+     * @private
      */
     var Browser = (function (_super) {
         __extends(Browser, _super);
         function Browser() {
             _super.call(this);
+            this.trans = null;
             this.ua = navigator.userAgent.toLowerCase();
             this.trans = this._getTrans();
         }
@@ -54,7 +56,7 @@ var egret;
              * @returns {boolean}
              */
             get: function () {
-                egret.Logger.warning("Browser.isMobile接口参数已经变更，请尽快调整用法为 egret.MainContext.deviceType == egret.MainContext.DEVICE_MOBILE ");
+                egret.Logger.warningWithErrorId(1000);
                 return egret.MainContext.deviceType == egret.MainContext.DEVICE_MOBILE;
             },
             enumerable: true,

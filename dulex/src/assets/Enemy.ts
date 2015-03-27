@@ -2,7 +2,7 @@ class Enemy extends egret.Bitmap{
     private static cacheDict:Object = {};
     public static typeArr:string[] = ["a","b","c"];
     public static speedDict:any = {"a":4.5,"b":5,"c":4};
-    public static allPosition:string[] = ["middle","left","left"];
+    public static allPosition:string[] = ["left","middle","right"];
     public enemyPosition:string;
     /**生产*/
     public static produce(type:string):Enemy{

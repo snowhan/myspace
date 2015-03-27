@@ -37,11 +37,37 @@ var egret;
      * @classdesc
      * MainContext是游戏的核心跨平台接口，组合了多个功能Context，并是游戏启动的主入口
      * @extends egret.EventDispatcher
+     * @private
      */
     var MainContext = (function (_super) {
         __extends(MainContext, _super);
         function MainContext() {
             _super.call(this);
+            /**
+             * 渲染Context
+             * @member egret.MainContext#rendererContext
+             */
+            this.rendererContext = null;
+            /**
+             * 触摸Context
+             * @member egret.MainContext#touchContext
+             */
+            this.touchContext = null;
+            /**
+             * 网络Context
+             * @member egret.MainContext#netContext
+             */
+            this.netContext = null;
+            /**
+             * 设备divice
+             * @member egret.MainContext#deviceContext
+             */
+            this.deviceContext = null;
+            /**
+             * 舞台
+             * @member egret.MainContext#stage
+             */
+            this.stage = null;
             this.reuseEvent = new egret.Event("");
         }
         /**
@@ -53,6 +79,7 @@ var egret;
             egret.Ticker.getInstance().register(this.renderLoop, this, Number.NEGATIVE_INFINITY);
             egret.Ticker.getInstance().register(this.broadcastEnterFrame, this, Number.POSITIVE_INFINITY);
             this.touchContext.run();
+            this._profileInstance = egret.Profiler.getInstance();
         };
         /**
          * 滑动跑道模型，渲染部分
@@ -83,13 +110,33 @@ var egret;
             var context = this.rendererContext;
             context.onRenderStart();
             context.clearScreen();
+            MainContext.__DRAW_COMMAND_LIST = [];
+            MainContext._renderLoopPhase = "updateTransform";
             stage._updateTransform();
+            MainContext._renderLoopPhase = "draw";
             event._type = egret.Event.FINISH_UPDATE_TRANSFORM;
             this.dispatchEvent(event);
-            stage._draw(context);
+            if (MainContext.__use_new_draw) {
+                this._draw(context);
+            }
+            else {
+                stage._draw(context);
+            }
             event._type = egret.Event.FINISH_RENDER;
             this.dispatchEvent(event);
+            if (this._profileInstance._isRunning) {
+                this._profileInstance._drawProfiler();
+            }
             context.onRenderFinish();
+        };
+        MainContext.prototype._draw = function (context) {
+            var list = MainContext.__DRAW_COMMAND_LIST;
+            var length = list.length;
+            for (var i = 0; i < length; i++) {
+                var cmd = list[i];
+                cmd.call(context);
+                cmd.dispose();
+            }
         };
         /**
          * 广播EnterFrame事件。
@@ -156,10 +203,14 @@ var egret;
                 }
             }
         };
+        MainContext.deviceType = null;
         MainContext.DEVICE_PC = "web";
         MainContext.DEVICE_MOBILE = "native";
         MainContext.RUNTIME_HTML5 = "runtime_html5";
         MainContext.RUNTIME_NATIVE = "runtime_native";
+        MainContext.__DRAW_COMMAND_LIST = [];
+        //是否使用新的draw机制
+        MainContext.__use_new_draw = true;
         MainContext.cachedEvent = new egret.Event("");
         return MainContext;
     })(egret.EventDispatcher);

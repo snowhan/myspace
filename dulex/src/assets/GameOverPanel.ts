@@ -20,7 +20,7 @@ class GameOverPanel extends egret.DisplayObjectContainer{
 		this.addChild(this.bg);
 
 		this.scoreText = new egret.BitmapText();
-		this.scoreText.spriteSheet = RES.getRes("font1");
+		this.scoreText.font = RES.getRes("font1");
 		this.scoreText.anchorX = this.scoreText.anchorY = 0.5;
 		this.scoreText.scaleX = this.scoreText.scaleY = 1 * Main.isFpsTrueNumber;
 		this.scoreText.x = Main.stage.stageWidth / 2;

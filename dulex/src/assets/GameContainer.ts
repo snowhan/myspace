@@ -103,9 +103,15 @@ class GameContainer extends egret.DisplayObjectContainer{
 	}
 	/*准备游戏开始界面*/
 	private initStartComponents(){
+		var shan:egret.Bitmap = GameUtil.createBitmapByName("shan");
+
+		this.addChild(shan);
+
+
 		var data = RES.getRes("paodaojson");//获取动画文件的信息配置文件
 		var texture = RES.getRes("paodao");//获取动画文件的图片
-		var mc = new egret.MovieClip(data,texture);//创建MovieClip
+		var mcDataFactory = new egret.MovieClipDataFactory(data, texture);
+		var mc= new egret.MovieClip(mcDataFactory.generateMovieClipData("paodao"));
 		mc.scaleX = 1 * Main.isFpsTrueNumber;
 		mc.scaleY = 1 * Main.isFpsTrueNumber;
 
@@ -117,7 +123,8 @@ class GameContainer extends egret.DisplayObjectContainer{
 		//mc.scaleX = mc.scaleY = 0.2;
 		//this.boomMovie = mc;
 		this.addChild(mc);
-		mc.gotoAndPlay('paodao');
+		//mc.gotoAndPlay('paodao');
+		mc.play(-1);
 		this.bg = mc;
 
 		var _leftShape:egret.Shape = new egret.Shape();
@@ -342,9 +349,9 @@ class GameContainer extends egret.DisplayObjectContainer{
 		if(enemy.enemyPosition == "left"){
 			enemy.x = 360;
 		}else if(enemy.enemyPosition == "middle"){
-			enemy.x = 350;
+			enemy.x = 380;
 		}else{
-			enemy.x = 370;
+			enemy.x = 385;
 		}
 
 		//enemy.x = 100;
@@ -459,9 +466,9 @@ class GameContainer extends egret.DisplayObjectContainer{
 			if(enemy.enemyPosition == "left"){
 				this.enemyLeftRun(enemy)
 			}else if(enemy.enemyPosition == "middle"){
-				enemy.y += enemy.speed*speedOffset;
+				this.enemyMiddleRun(enemy)
 			}else{
-				enemy.y += enemy.speed*speedOffset;
+				this.enemyRightRun(enemy)
 			}
 
             if(enemy.y>this.stageH){
@@ -598,8 +605,33 @@ class GameContainer extends egret.DisplayObjectContainer{
 		//this.v += this.a;
 		enemyObj.y += 3;
 		enemyObj.x -= 7;
-		enemyObj.scaleY += 0.02;
-		enemyObj.scaleX += 0.02
+		if(enemyObj.scaleX < 1){
+			enemyObj.scaleY += 0.015;
+			enemyObj.scaleX += 0.015
+		}
+	}
+
+	private enemyMiddleRun(enemyObj){
+
+		//this.v += this.a;
+		enemyObj.y += 3;
+		enemyObj.x -= 0.08;
+		if(enemyObj.scaleX < 1){
+			enemyObj.scaleY += 0.015;
+			enemyObj.scaleX += 0.015
+		}
+	}
+
+	private enemyRightRun(enemyObj){
+
+		//this.v += this.a;
+		enemyObj.y += 3;
+		enemyObj.x += 8;
+		if(enemyObj.scaleX < 1){
+			enemyObj.scaleY += 0.015;
+			enemyObj.scaleX += 0.015
+		}
+
 	}
 
 

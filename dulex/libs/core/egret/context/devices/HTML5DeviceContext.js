@@ -36,6 +36,7 @@ var egret;
      * @class egret.HTML5DeviceContext
      * @classdesc
      * @extends egret.DeviceContext
+     * @private
      */
     var HTML5DeviceContext = (function (_super) {
         __extends(HTML5DeviceContext, _super);
@@ -47,6 +48,7 @@ var egret;
             _super.call(this);
             this.frameRate = frameRate;
             this._time = 0;
+            this._requestAnimationId = NaN;
             this._isActivate = true;
             if (frameRate == 60) {
                 HTML5DeviceContext.requestAnimationFrame = window["requestAnimationFrame"] || window["webkitRequestAnimationFrame"] || window["mozRequestAnimationFrame"] || window["oRequestAnimationFrame"] || window["msRequestAnimationFrame"];
@@ -154,6 +156,11 @@ var egret;
                 document.addEventListener(visibilityChange, handleVisibilityChange, false);
             }
         };
+        HTML5DeviceContext.instance = null;
+        HTML5DeviceContext.requestAnimationFrame = null;
+        HTML5DeviceContext.cancelAnimationFrame = null;
+        HTML5DeviceContext._thisObject = null;
+        HTML5DeviceContext._callback = null;
         return HTML5DeviceContext;
     })(egret.DeviceContext);
     egret.HTML5DeviceContext = HTML5DeviceContext;
@@ -172,7 +179,7 @@ var egret_html5_localStorage;
             return true;
         }
         catch (e) {
-            console.log("egret_html5_localStorage.setItem保存失败,key=" + key + "&value=" + value);
+            egret.Logger.infoWithErrorId(1018, key, value);
             return false;
         }
     }

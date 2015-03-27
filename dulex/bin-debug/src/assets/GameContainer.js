@@ -73,9 +73,12 @@ var GameContainer = (function (_super) {
     };
     /*准备游戏开始界面*/
     GameContainer.prototype.initStartComponents = function () {
+        var shan = GameUtil.createBitmapByName("shan");
+        this.addChild(shan);
         var data = RES.getRes("paodaojson"); //获取动画文件的信息配置文件
         var texture = RES.getRes("paodao"); //获取动画文件的图片
-        var mc = new egret.MovieClip(data, texture); //创建MovieClip
+        var mcDataFactory = new egret.MovieClipDataFactory(data, texture);
+        var mc = new egret.MovieClip(mcDataFactory.generateMovieClipData("paodao"));
         mc.scaleX = 1 * Main.isFpsTrueNumber;
         mc.scaleY = 1 * Main.isFpsTrueNumber;
         //this.addChild(mc);//添加到显示列表，显示影片剪辑
@@ -86,7 +89,8 @@ var GameContainer = (function (_super) {
         //mc.scaleX = mc.scaleY = 0.2;
         //this.boomMovie = mc;
         this.addChild(mc);
-        mc.gotoAndPlay('paodao');
+        //mc.gotoAndPlay('paodao');
+        mc.play(-1);
         this.bg = mc;
         var _leftShape = new egret.Shape();
         this.leftShape = _leftShape;
@@ -281,10 +285,10 @@ var GameContainer = (function (_super) {
             enemy.x = 360;
         }
         else if (enemy.enemyPosition == "middle") {
-            enemy.x = 350;
+            enemy.x = 380;
         }
         else {
-            enemy.x = 370;
+            enemy.x = 385;
         }
         //enemy.x = 100;
         //enemy.y = -enemy.height-Math.random()*300;
@@ -385,10 +389,10 @@ var GameContainer = (function (_super) {
                 this.enemyLeftRun(enemy);
             }
             else if (enemy.enemyPosition == "middle") {
-                enemy.y += enemy.speed * speedOffset;
+                this.enemyMiddleRun(enemy);
             }
             else {
-                enemy.y += enemy.speed * speedOffset;
+                this.enemyRightRun(enemy);
             }
             if (enemy.y > this.stageH) {
                 delArr.push(enemy);
@@ -463,8 +467,28 @@ var GameContainer = (function (_super) {
         //this.v += this.a;
         enemyObj.y += 3;
         enemyObj.x -= 7;
-        enemyObj.scaleY += 0.02;
-        enemyObj.scaleX += 0.02;
+        if (enemyObj.scaleX < 1) {
+            enemyObj.scaleY += 0.015;
+            enemyObj.scaleX += 0.015;
+        }
+    };
+    GameContainer.prototype.enemyMiddleRun = function (enemyObj) {
+        //this.v += this.a;
+        enemyObj.y += 3;
+        enemyObj.x -= 0.08;
+        if (enemyObj.scaleX < 1) {
+            enemyObj.scaleY += 0.015;
+            enemyObj.scaleX += 0.015;
+        }
+    };
+    GameContainer.prototype.enemyRightRun = function (enemyObj) {
+        //this.v += this.a;
+        enemyObj.y += 3;
+        enemyObj.x += 8;
+        if (enemyObj.scaleX < 1) {
+            enemyObj.scaleY += 0.015;
+            enemyObj.scaleX += 0.015;
+        }
     };
     /*添加分数*/
     GameContainer.prototype.addScore = function (value) {

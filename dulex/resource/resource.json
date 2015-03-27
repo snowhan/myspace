@@ -32,7 +32,7 @@
 	  {"name":"level3","type":"image","url":"level3.png"},
 	  {"name":"bzjson","type":"json","url":"bzJson.json"},
 
-
+	  {"name":"shan","type":"image","url":"shan.png"},
 	  {"name":"paodao","type":"image","url":"paodao.png"},
 	  {"name":"paodaojson","type":"json","url":"paodaojson.json"},
 	  {"name":"a1","type":"image","url":"a1.png"},
@@ -42,6 +42,6 @@
 
 "groups":
 	[
-        {"name":"preload","keys":"c1,a1,paodao,paodaojson,playerjson,player,  level3,level2,level1,b1,gameOverShare,gameOverReplay,gameOverBg,font1,missile,bz,bzjson,bullet,    pauseBg,homeBtn,resumeBtn,replayBtn,pauseBtn,moreBtn,number,start_bg,blast,bg,"}
+        {"name":"preload","keys":"shan,c1,a1,paodao,paodaojson,playerjson,player,  level3,level2,level1,b1,gameOverShare,gameOverReplay,gameOverBg,font1,missile,bz,bzjson,bullet,    pauseBg,homeBtn,resumeBtn,replayBtn,pauseBtn,moreBtn,number,start_bg,blast,bg,"}
 	]
 }

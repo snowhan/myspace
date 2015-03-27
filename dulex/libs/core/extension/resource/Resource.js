@@ -93,6 +93,17 @@ var RES;
     }
     RES.hasRes = hasRes;
     /**
+     * 运行时动态解析一个配置文件,
+     * @method RES.parseConfig
+     * @param data {any} 配置文件数据，请参考resource.json的配置文件格式。传入对应的json对象即可。
+     * @param folder {string} 加载项的路径前缀。
+     */
+    function parseConfig(data, folder) {
+        if (folder === void 0) { folder = ""; }
+        instance.parseConfig(data, folder);
+    }
+    RES.parseConfig = parseConfig;
+    /**
      * 同步方式获取缓存的已经加载成功的资源。<br/>
      * @method RES.getRes
      * @param key {string} 对应配置文件里的name属性或sbuKeys属性的一项。
@@ -145,6 +156,14 @@ var RES;
         instance.setMaxLoadingThread(thread);
     }
     RES.setMaxLoadingThread = setMaxLoadingThread;
+    /**
+     * 设置资源加载失败时的重试次数，默认值是 3。
+     * @param retry 要设置的重试次数。
+     */
+    function setMaxRetryTimes(retry) {
+        instance.setMaxRetryTimes(retry);
+    }
+    RES.setMaxRetryTimes = setMaxRetryTimes;
     /**
      * 添加事件侦听器,参考ResourceEvent定义的常量。
      * @method RES.addEventListener
@@ -241,6 +260,7 @@ var RES;
             this.resLoader.callBack = this.onResourceItemComp;
             this.resLoader.resInstance = this;
             this.resLoader.addEventListener(RES.ResourceEvent.GROUP_COMPLETE, this.onGroupComp, this);
+            this.resLoader.addEventListener(RES.ResourceEvent.GROUP_LOAD_ERROR, this.onGroupError, this);
         };
         /**
          * 开始加载配置
@@ -298,7 +318,11 @@ var RES;
          */
         Resource.prototype.loadGroup = function (name, priority) {
             if (priority === void 0) { priority = 0; }
-            if (this.loadedGroups.indexOf(name) != -1 || this.resLoader.isGroupInLoading(name))
+            if (this.loadedGroups.indexOf(name) != -1) {
+                RES.ResourceEvent.dispatchResourceEvent(this, RES.ResourceEvent.GROUP_COMPLETE, name);
+                return;
+            }
+            if (this.resLoader.isGroupInLoading(name))
                 return;
             if (this.configComplete) {
                 var group = this.resConfig.getGroupByName(name);
@@ -343,16 +367,34 @@ var RES;
                 this.configComplete = true;
                 this.loadingConfigList = null;
                 RES.ResourceEvent.dispatchResourceEvent(this, RES.ResourceEvent.CONFIG_COMPLETE);
-                var groupNameList = this.groupNameList;
-                var length = groupNameList.length;
-                for (var i = 0; i < length; i++) {
-                    var item = groupNameList[i];
-                    this.loadGroup(item.name, item.priority);
-                }
-                this.groupNameList = [];
+                this.loadDelayGroups();
             }
             else {
                 this.loadedGroups.push(event.groupName);
+                this.dispatchEvent(event);
+            }
+        };
+        /**
+         * 启动延迟的组加载
+         */
+        Resource.prototype.loadDelayGroups = function () {
+            var groupNameList = this.groupNameList;
+            this.groupNameList = [];
+            var length = groupNameList.length;
+            for (var i = 0; i < length; i++) {
+                var item = groupNameList[i];
+                this.loadGroup(item.name, item.priority);
+            }
+        };
+        /**
+         * 队列加载失败事件
+         */
+        Resource.prototype.onGroupError = function (event) {
+            if (event.groupName == Resource.GROUP_CONFIG) {
+                this.loadingConfigList = null;
+                RES.ResourceEvent.dispatchResourceEvent(this, RES.ResourceEvent.CONFIG_LOAD_ERROR);
+            }
+            else {
                 this.dispatchEvent(event);
             }
         };
@@ -372,6 +414,18 @@ var RES;
                 }
             }
             return true;
+        };
+        /**
+         * 运行时动态解析一个配置文件,
+         * @param data {any} 配置文件数据，请参考resource.json的配置文件格式。传入对应的json对象即可。
+         * @param folder {string} 加载项的路径前缀。
+         */
+        Resource.prototype.parseConfig = function (data, folder) {
+            this.resConfig.parseConfig(data, folder);
+            if (!this.configComplete && !this.loadingConfigList) {
+                this.configComplete = true;
+                this.loadDelayGroups();
+            }
         };
         /**
          * 通过key同步获取资源
@@ -476,6 +530,8 @@ var RES;
                 case "png":
                 case "jpg":
                 case "gif":
+                case "jpeg":
+                case "bmp":
                     type = RES.ResourceItem.TYPE_IMAGE;
                     break;
                 case "fnt":
@@ -557,6 +613,14 @@ var RES;
                 thread = 1;
             }
             this.resLoader.thread = thread;
+        };
+        /**
+         * 设置资源加载失败时的重试次数。
+         * @param retry 要设置的重试次数。
+         */
+        Resource.prototype.setMaxRetryTimes = function (retry) {
+            retry = Math.max(retry, 0);
+            this.resLoader.maxRetryTimes = retry;
         };
         /**
          * 配置文件组组名

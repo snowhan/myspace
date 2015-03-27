@@ -32,11 +32,15 @@ var __extends = this.__extends || function (d, b) {
 };
 var egret;
 (function (egret) {
+    /**
+     * @private
+     */
     var HTML5TouchContext = (function (_super) {
         __extends(HTML5TouchContext, _super);
         function HTML5TouchContext() {
             _super.call(this);
             this._isTouchDown = false;
+            this.rootDiv = null;
             this.rootDiv = document.getElementById(egret.StageDelegate.canvas_div_name);
         }
         HTML5TouchContext.prototype.prevent = function (event) {

@@ -91,8 +91,13 @@ var RES;
                 }
                 else {
                     item = this.keyMap[key];
-                    if (item && group.indexOf(item) == -1)
-                        group.push(item);
+                    if (item) {
+                        if (group.indexOf(item) == -1)
+                            group.push(item);
+                    }
+                    else {
+                        egret.Logger.warningWithErrorId(2000, key);
+                    }
                 }
             }
             if (group.length == 0)

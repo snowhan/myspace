@@ -56,9 +56,25 @@ var egret;
              * 绘制纹理的缩放比率，默认值为1
              * @member egret.RendererContext#texture_scale_factor
              */
-            this.texture_scale_factor = 1;
+            this._texture_scale_factor = 1;
             this.profiler = egret.Profiler.getInstance();
+            if (!RendererContext.blendModesForGL) {
+                RendererContext.initBlendMode();
+            }
         }
+        Object.defineProperty(RendererContext.prototype, "texture_scale_factor", {
+            get: function () {
+                return this._texture_scale_factor;
+            },
+            set: function (value) {
+                this._setTextureScaleFactor(value);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        RendererContext.prototype._setTextureScaleFactor = function (value) {
+            this._texture_scale_factor = value;
+        };
         /**
          * @method egret.RendererContext#clearScreen
          * @private
@@ -90,6 +106,25 @@ var egret;
          */
         RendererContext.prototype.drawImage = function (texture, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight, repeat) {
             if (repeat === void 0) { repeat = "no-repeat"; }
+            this.profiler.onDrawImage();
+        };
+        /**
+         * 绘制9宫图片
+         * @method egret.RendererContext#drawImageScale9
+         * @param texture {Texture}
+         * @param sourceX {any}
+         * @param sourceY {any}
+         * @param sourceWidth {any}
+         * @param sourceHeight {any}
+         * @param destX {any}
+         * @param destY {any}
+         * @param destWidth {any}
+         * @param destHeigh {any}
+         */
+        RendererContext.prototype.drawImageScale9 = function (texture, sourceX, sourceY, sourceWidth, sourceHeight, offX, offY, destWidth, destHeight, rect) {
+            return false;
+        };
+        RendererContext.prototype._addOneDraw = function () {
             this.profiler.onDrawImage();
         };
         /**
@@ -150,14 +185,55 @@ var egret;
         };
         RendererContext.prototype.setGlobalColorTransform = function (colorTransformMatrix) {
         };
+        RendererContext.prototype.setGlobalFilter = function (filterData) {
+        };
         RendererContext.createRendererContext = function (canvas) {
             return null;
+        };
+        RendererContext.deleteTexture = function (texture) {
+            var context = egret.MainContext.instance.rendererContext;
+            var gl = context["gl"];
+            var bitmapData = texture._bitmapData;
+            if (bitmapData) {
+                var webGLTexture = bitmapData.webGLTexture;
+                if (webGLTexture && gl) {
+                    for (var key in webGLTexture) {
+                        var glTexture = webGLTexture[key];
+                        gl.deleteTexture(glTexture);
+                    }
+                }
+                bitmapData.webGLTexture = null;
+            }
+        };
+        RendererContext.initBlendMode = function () {
+            RendererContext.blendModesForGL = {};
+            RendererContext.blendModesForGL[egret.BlendMode.NORMAL] = [1, 771];
+            RendererContext.blendModesForGL[egret.BlendMode.ADD] = [770, 1];
+            RendererContext.blendModesForGL[egret.BlendMode.ERASE] = [0, 771];
+            RendererContext.blendModesForGL[egret.BlendMode.ERASE_REVERSE] = [0, 770];
+        };
+        /**
+         * 设置 gl 模式下的blendMode，canvas模式下不会生效
+         * @method egret.RendererContext#registerBlendModeForGL
+         * @param key {string} 键值
+         * @param src {number} 源颜色因子
+         * @param dst {number} 目标颜色因子
+         * @param override {boolean} 是否覆盖
+         */
+        RendererContext.registerBlendModeForGL = function (key, src, dst, override) {
+            if (RendererContext.blendModesForGL[key] && !override) {
+                egret.Logger.warningWithErrorId(1005, key);
+            }
+            else {
+                RendererContext.blendModesForGL[key] = [src, dst];
+            }
         };
         /**
          * 是否对图像使用平滑处理
          * 该特性目前只支持Canvas
          */
         RendererContext.imageSmoothingEnabled = true;
+        RendererContext.blendModesForGL = null;
         return RendererContext;
     })(egret.HashObject);
     egret.RendererContext = RendererContext;

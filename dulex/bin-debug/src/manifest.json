@@ -1,0 +1,11 @@
+[
+	"Main.ts",
+	"config\\GameConfig.ts",
+	"utils\\GameUtil.ts",
+	"assets\\Enemy.ts",
+	"assets\\GameOverPanel.ts",
+	"assets\\Player.ts",
+	"assets\\StartContainer.ts",
+	"utils\\GameUtils.ts",
+	"assets\\GameContainer.ts"
+]

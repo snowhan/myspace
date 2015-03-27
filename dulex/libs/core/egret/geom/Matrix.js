@@ -35,12 +35,14 @@ var egret;
     /**
      * @class egret.Matrix
      * @classdesc
-     * 2D矩阵类，包括常见矩阵算法
+     * Matrix 类表示一个转换矩阵，它确定如何将点从一个坐标空间映射到另一个坐标空间。
+     * 您可以对一个显示对象执行不同的图形转换，方法是设置 Matrix 对象的属性，将该 Matrix 对象应用于 Transform 对象的 matrix 属性，然后应用该 Transform 对象作为显示对象的 transform 属性。这些转换函数包括平移（x 和 y 重新定位）、旋转、缩放和倾斜。
      * @extends egret.HashObject
      */
     var Matrix = (function (_super) {
         __extends(Matrix, _super);
         /**
+         * 创建一个 egret.Matrix 对象
          * @method egret.Matrix#constructor
          * @param a {number} 缩放或旋转图像时影响像素沿 x 轴定位的值。
          * @param b {number} 旋转或倾斜图像时影响像素沿 y 轴定位的值。
@@ -67,12 +69,12 @@ var egret;
         /**
          * 前置矩阵
          * @method egret.Matrix#prepend
-         * @param a {number}
-         * @param b {number}
-         * @param c {number}
-         * @param d {number}
-         * @param tx {number}
-         * @param ty {number}
+         * @param a {number} 缩放或旋转图像时影响像素沿 x 轴定位的值
+         * @param b {number} 缩放或旋转图像时影响像素沿 y 轴定位的值
+         * @param c {number} 缩放或旋转图像时影响像素沿 x 轴定位的值
+         * @param d {number} 缩放或旋转图像时影响像素沿 y 轴定位的值
+         * @param tx {number} 沿 x 轴平移每个点的距离
+         * @param ty {number} 沿 y 轴平移每个点的距离
          * @returns {egret.Matrix}
          */
         Matrix.prototype.prepend = function (a, b, c, d, tx, ty) {
@@ -92,12 +94,12 @@ var egret;
         /**
          * 后置矩阵
          * @method egret.Matrix#append
-         * @param a {number}
-         * @param b {number}
-         * @param c {number}
-         * @param d {number}
-         * @param tx {number}
-         * @param ty {number}
+         * @param a {number} 缩放或旋转图像时影响像素沿 x 轴定位的值
+         * @param b {number} 缩放或旋转图像时影响像素沿 y 轴定位的值
+         * @param c {number} 缩放或旋转图像时影响像素沿 x 轴定位的值
+         * @param d {number} 缩放或旋转图像时影响像素沿 y 轴定位的值
+         * @param tx {number} 沿 x 轴平移每个点的距离
+         * @param ty {number} 沿 y 轴平移每个点的距离
          * @returns {egret.Matrix}
          */
         Matrix.prototype.append = function (a, b, c, d, tx, ty) {
@@ -118,22 +120,22 @@ var egret;
         /**
          * 前置矩阵
          * @method egret.Matrix#prependTransform
-         * @param x {number}
-         * @param y {number}
-         * @param scaleX {number}
-         * @param scaleY {number}
-         * @param rotation {number}
-         * @param skewX {number}
-         * @param skewY {number}
-         * @param regX {number}
-         * @param regY {number}
+         * @param x {number} x值
+         * @param y {number} y值
+         * @param scaleX {number} 水平缩放
+         * @param scaleY {number} 垂直缩放
+         * @param rotation {number} 旋转
+         * @param skewX {number} x方向斜切
+         * @param skewY {number} y方向斜切
+         * @param regX {number} x值偏移
+         * @param regY {number} y值偏移
          * @returns {egret.Matrix}
          */
         Matrix.prototype.prependTransform = function (x, y, scaleX, scaleY, rotation, skewX, skewY, regX, regY) {
             if (rotation % 360) {
-                var r = rotation * Matrix.DEG_TO_RAD;
-                var cos = Math.cos(r);
-                var sin = Math.sin(r);
+                var r = rotation; // * Matrix.DEG_TO_RAD;
+                var cos = egret.NumberUtils.cos(r);
+                var sin = egret.NumberUtils.sin(r);
             }
             else {
                 cos = 1;
@@ -146,10 +148,10 @@ var egret;
             }
             if (skewX || skewY) {
                 // TODO: can this be combined into a single prepend operation?
-                skewX *= Matrix.DEG_TO_RAD;
-                skewY *= Matrix.DEG_TO_RAD;
+                //                skewX *= Matrix.DEG_TO_RAD;
+                //                skewY *= Matrix.DEG_TO_RAD;
                 this.prepend(cos * scaleX, sin * scaleX, -sin * scaleY, cos * scaleY, 0, 0);
-                this.prepend(Math.cos(skewY), Math.sin(skewY), -Math.sin(skewX), Math.cos(skewX), x, y);
+                this.prepend(egret.NumberUtils.cos(skewY), egret.NumberUtils.sin(skewY), -egret.NumberUtils.sin(skewX), egret.NumberUtils.cos(skewX), x, y);
             }
             else {
                 this.prepend(cos * scaleX, sin * scaleX, -sin * scaleY, cos * scaleY, x, y);
@@ -159,22 +161,22 @@ var egret;
         /**
          * 后置矩阵
          * @method egret.Matrix#appendTransform
-         * @param x {number}
-         * @param y {number}
-         * @param scaleX {number}
-         * @param scaleY {number}
-         * @param rotation {number}
-         * @param skewX {number}
-         * @param skewY {number}
-         * @param regX {number}
-         * @param regY {number}
+         * @param x {number} x值
+         * @param y {number} y值
+         * @param scaleX {number} 水平缩放
+         * @param scaleY {number} 垂直缩放
+         * @param rotation {number} 旋转
+         * @param skewX {number} x方向斜切
+         * @param skewY {number} y方向斜切
+         * @param regX {number} x值偏移
+         * @param regY {number} y值偏移
          * @returns {egret.Matrix}
          */
         Matrix.prototype.appendTransform = function (x, y, scaleX, scaleY, rotation, skewX, skewY, regX, regY) {
             if (rotation % 360) {
-                var r = rotation * Matrix.DEG_TO_RAD;
-                var cos = Math.cos(r);
-                var sin = Math.sin(r);
+                var r = rotation; // * Matrix.DEG_TO_RAD;
+                var cos = egret.NumberUtils.cos(r);
+                var sin = egret.NumberUtils.sin(r);
             }
             else {
                 cos = 1;
@@ -182,9 +184,9 @@ var egret;
             }
             if (skewX || skewY) {
                 // TODO: can this be combined into a single append?
-                skewX *= Matrix.DEG_TO_RAD;
-                skewY *= Matrix.DEG_TO_RAD;
-                this.append(Math.cos(skewY), Math.sin(skewY), -Math.sin(skewX), Math.cos(skewX), x, y);
+                //                skewX *= Matrix.DEG_TO_RAD;
+                //                skewY *= Matrix.DEG_TO_RAD;
+                this.append(egret.NumberUtils.cos(skewY), egret.NumberUtils.sin(skewY), -egret.NumberUtils.sin(skewX), egret.NumberUtils.cos(skewX), x, y);
                 this.append(cos * scaleX, sin * scaleX, -sin * scaleY, cos * scaleY, 0, 0);
             }
             else {
@@ -221,21 +223,21 @@ var egret;
         /**
          * 矩阵斜切，以角度值为单位
          * @method egret.Matrix#skew
-         * @param skewX {number}
-         * @param skewY {number}
+         * @param skewX {number} x方向斜切
+         * @param skewY {number} y方向斜切
          * @returns {egret.Matrix}
          */
         Matrix.prototype.skew = function (skewX, skewY) {
-            skewX = skewX * Matrix.DEG_TO_RAD;
-            skewY = skewY * Matrix.DEG_TO_RAD;
-            this.append(Math.cos(skewY), Math.sin(skewY), -Math.sin(skewX), Math.cos(skewX), 0, 0);
+            //            skewX = skewX * Matrix.DEG_TO_RAD;
+            //            skewY = skewY * Matrix.DEG_TO_RAD;
+            this.append(egret.NumberUtils.cos(skewY), egret.NumberUtils.sin(skewY), -egret.NumberUtils.sin(skewX), egret.NumberUtils.cos(skewX), 0, 0);
             return this;
         };
         /**
          * 矩阵缩放
          * @method egret.Matrix#scale
-         * @param x {number}
-         * @param y {number}
+         * @param x {number} 水平缩放
+         * @param y {number} 垂直缩放
          * @returns {egret.Matrix}
          */
         Matrix.prototype.scale = function (x, y) {
@@ -274,6 +276,7 @@ var egret;
         /**
          * 矩阵重置为目标矩阵
          * @method egret.Matrix#identityMatrix
+         * @param matrix {egret.Matrix} 重置的目标矩阵
          * @returns {egret.Matrix}
          */
         Matrix.prototype.identityMatrix = function (matrix) {

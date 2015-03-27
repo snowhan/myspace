@@ -21,7 +21,8 @@ var Player = (function (_super) {
         //this.bitmap.texture = RES.getRes("z"+this.blood);
         var data = RES.getRes("playerjson"); //获取动画文件的信息配置文件
         var texture = RES.getRes("player"); //获取动画文件的图片
-        var mc = new egret.MovieClip(data, texture); //创建MovieClip
+        var mcDataFactory = new egret.MovieClipDataFactory(data, texture);
+        var mc = new egret.MovieClip(mcDataFactory.generateMovieClipData("player"));
         mc.scaleX = 0.3 * Main.isFpsTrueNumber;
         mc.scaleY = 0.3 * Main.isFpsTrueNumber;
         mc.x = 0;
@@ -31,7 +32,8 @@ var Player = (function (_super) {
         //mc.scaleX = mc.scaleY = 0.2;
         //this.boomMovie = mc;
         this.addChild(mc);
-        mc.gotoAndPlay('player');
+        //mc.gotoAndPlay('player');
+        mc.play(-1);
         this.bitmap = mc;
         this.fireTimer = new egret.Timer(GameConfig.FIRE_DELAY);
         this.fireTimer.addEventListener(egret.TimerEvent.TIMER, this.createBullet, this);

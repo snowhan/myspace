@@ -89,12 +89,15 @@ var egret;
             if (locTexture == null || sourceHeight == 0 || sourceWidth == 0 || destWidth == 0 || destHeight == 0) {
                 return;
             }
+            var texture_scale_factor = egret.MainContext.instance.rendererContext._texture_scale_factor;
+            sourceWidth = sourceWidth / texture_scale_factor;
+            sourceHeight = sourceHeight / texture_scale_factor;
             if (this._drawAreaList.length == 0 || !egret.MainContext.instance.rendererContext["_cacheCanvasContext"]) {
                 renderContext.drawImage(locTexture, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight, repeat);
                 return;
             }
             //计算worldBounds
-            var bounds = egret.DisplayObject.getTransformBounds(data._getSize(egret.Rectangle.identity), data._worldTransform);
+            var bounds = egret.DisplayObject.getTransformBounds(data._getSize(RenderFilter.identityRectangle), data._worldTransform);
             data._worldBounds.initialize(bounds.x, bounds.y, bounds.width, bounds.height);
             var originalData = this._originalData;
             originalData.sourceX = sourceX;
@@ -194,6 +197,7 @@ var egret;
             egret.MainContext.instance.stage.removeEventListener(egret.Event.RESIZE, this.onResize, this);
             this._defaultDrawAreaList = null;
         };
+        RenderFilter.identityRectangle = new egret.Rectangle();
         return RenderFilter;
     })(egret.HashObject);
     egret.RenderFilter = RenderFilter;

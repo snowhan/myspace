@@ -41,6 +41,8 @@ var egret;
         __extends(HTML5StageText, _super);
         function HTML5StageText() {
             _super.call(this);
+            this.div = null;
+            this.inputElement = null;
             this._hasListeners = false;
             this._inputType = "";
             this._isShow = false;
@@ -56,7 +58,7 @@ var egret;
             div.scale.x = scaleX;
             div.scale.y = scaleY;
             div.transforms();
-            div.style[egret_dom.getTrans("transformOrigin")] = "0% 0% 0px";
+            div.style[HTML5StageText.getTrans("transformOrigin")] = "0% 0% 0px";
             this.div = div;
             var stage = egret.MainContext.instance.stage;
             var stageWidth = stage.stageWidth;
@@ -71,6 +73,30 @@ var egret;
             this._shape = shape;
             this.getStageDelegateDiv().appendChild(this.div);
         }
+        /**
+         * 获取当前浏览器类型
+         * @type {string}
+         */
+        HTML5StageText.getTrans = function (type) {
+            if (HTML5StageText.header == "") {
+                HTML5StageText.header = HTML5StageText.getHeader();
+            }
+            return HTML5StageText.header + type.substring(1, type.length);
+        };
+        /**
+         * 获取当前浏览器的类型
+         * @returns {string}
+         */
+        HTML5StageText.getHeader = function () {
+            var tempStyle = document.createElement('div').style;
+            var transArr = ["t", "webkitT", "msT", "MozT", "OT"];
+            for (var i = 0; i < transArr.length; i++) {
+                var transform = transArr[i] + 'ransform';
+                if (transform in tempStyle)
+                    return transArr[i];
+            }
+            return transArr[0];
+        };
         HTML5StageText.prototype.getStageDelegateDiv = function () {
             var stageDelegateDiv = egret.Browser.getInstance().$("#StageDelegateDiv");
             if (!stageDelegateDiv) {
@@ -136,6 +162,7 @@ var egret;
             else {
                 inputElement = document.createElement("input");
             }
+            this._styleInfoes = {};
             inputElement.type = "text";
             this.inputElement = inputElement;
             this.inputElement.value = "";
@@ -183,10 +210,11 @@ var egret;
             //            if (this._multiline) {
             this.setElementStyle("height", this._height + "px");
             //            }
-            this.setElementStyle("border", "1px solid red");
+            //            this.setElementStyle("border", "1px solid red");
             this.setElementStyle("display", "block");
         };
         HTML5StageText.prototype._show = function () {
+            egret.MainContext.instance.stage._changeSizeDispatchFlag = false;
             if (this._maxChars > 0) {
                 this.inputElement.setAttribute("maxlength", this._maxChars);
             }
@@ -213,6 +241,7 @@ var egret;
             }
         };
         HTML5StageText.prototype._hide = function () {
+            egret.MainContext.instance.stage._changeSizeDispatchFlag = true;
             if (this.inputElement == null) {
                 return;
             }
@@ -263,6 +292,7 @@ var egret;
                 }
             }
         };
+        HTML5StageText.header = "";
         return HTML5StageText;
     })(egret.StageText);
     egret.HTML5StageText = HTML5StageText;

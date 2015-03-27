@@ -51,6 +51,16 @@ var RES;
              * @member {number} RES.ResourceEvent#itemsTotal
              */
             this.itemsTotal = 0;
+            /**
+             * 资源组名
+             * @member {string} RES.ResourceEvent#groupName
+             */
+            this.groupName = "";
+            /**
+             * 一次加载项加载结束的项信息对象
+             * @member {egret.ResourceItem} RES.ResourceEvent#resItem
+             */
+            this.resItem = null;
         }
         /**
          * 使用指定的EventDispatcher对象来抛出事件对象。抛出的对象将会缓存在对象池上，供下次循环复用。
@@ -81,20 +91,30 @@ var RES;
          */
         ResourceEvent.ITEM_LOAD_ERROR = "itemLoadError";
         /**
-         * 配置文件加载并解析完成事件
+         * 配置文件加载并解析完成事件。注意：若有配置文件加载失败，将不会抛出此事件，若要处理配置加载失败，请同时监听CONFIG_LOAD_ERROR事件。
          * @constant {string} RES.ResourceEvent.CONFIG_COMPLETE
          */
         ResourceEvent.CONFIG_COMPLETE = "configComplete";
+        /**
+         * 配置文件加载失败事件
+         * @constant {string} RES.ResourceEvent.CONFIG_COMPLETE
+         */
+        ResourceEvent.CONFIG_LOAD_ERROR = "configLoadError";
         /**
          * 延迟加载组资源加载进度事件
          * @constant {string} RES.ResourceEvent.GROUP_PROGRESS
          */
         ResourceEvent.GROUP_PROGRESS = "groupProgress";
         /**
-         * 延迟加载组资源加载完成事件
+         * 延迟加载组资源加载完成事件。注意：若组内有资源项加载失败，将不会抛出此事件，若要处理组加载失败，请同时监听GROUP_LOAD_ERROR事件。
          * @constant {string} RES.ResourceEvent.GROUP_COMPLETE
          */
         ResourceEvent.GROUP_COMPLETE = "groupComplete";
+        /**
+         * 延迟加载组资源加载失败事件
+         * @constant {string} RES.ResourceEvent.GROUP_LOAD_ERROR
+         */
+        ResourceEvent.GROUP_LOAD_ERROR = "groupLoadError";
         return ResourceEvent;
     })(egret.Event);
     RES.ResourceEvent = ResourceEvent;

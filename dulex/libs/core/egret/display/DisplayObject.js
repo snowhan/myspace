@@ -35,7 +35,7 @@ var egret;
     /**
      * @class egret.DisplayObject
      * @extends egret.EventDispatcher
-     * @classdesc 类是可放在显示列表中的所有对象的基类。该显示列表管理运行时显示的所有对象。使用 DisplayObjectContainer 类排列显示列表中的显示对象。
+     * @classdesc DisplayObject 类是可放在显示列表中的所有对象的基类。该显示列表管理运行时显示的所有对象。使用 DisplayObjectContainer 类排列显示列表中的显示对象。
      * DisplayObjectContainer 对象可以有子显示对象，而其他显示对象是“叶”节点，只有父级和同级，没有子级。
      * DisplayObject 类支持基本功能（如对象的 x 和 y 位置），也支持更高级的对象属性（如它的转换矩阵），所有显示对象都继承自 DisplayObject 类。
      * DisplayObject 类包含若干广播事件。通常，任何特定事件的目标均为一个特定的 DisplayObject 实例。
@@ -46,108 +46,45 @@ var egret;
      * 不允许重写以下方法
      * _draw();
      * getBounds();
-     *
+     * @link http://docs.egret-labs.org/post/manual/displayobj/aboutdisplayobj.html 显示对象的基本概念
      */
     var DisplayObject = (function (_super) {
         __extends(DisplayObject, _super);
+        /**
+         * 创建一个 egret.DisplayObject 对象
+         */
         function DisplayObject() {
             _super.call(this);
             this.__hack_local_matrix = null;
             this._normalDirty = true;
             //对宽高有影响
             this._sizeDirty = true;
+            /**
+             * 尺寸发生改变的回调函数。若此对象被添加到UIAsset里，此函数将被赋值，在尺寸发生改变时通知UIAsset重新测量。
+             */
+            this._sizeChangeCallBack = null;
+            this._sizeChangeCallTarget = null;
+            /**
+             * 表示 DisplayObject 的实例名称。
+             * 通过调用父显示对象容器的 getChildByName() 方法，可以在父显示对象容器的子列表中标识该对象。
+             * @member {string} egret.DisplayObject#name
+             */
+            this.name = null;
             this._texture_to_render = null;
             this._parent = null;
-            /**
-             * 表示 DisplayObject 实例相对于父级 DisplayObjectContainer 本地坐标的 x 坐标。
-             * 如果该对象位于具有变形的 DisplayObjectContainer 内，则它也位于包含 DisplayObjectContainer 的本地坐标系中。因此，对于逆时针旋转 90 度的 DisplayObjectContainer，该 DisplayObjectContainer 的子级将继承逆时针旋转 90 度的坐标系。
-             * @member {number} egret.DisplayObject#x
-             */
             this._x = 0;
-            /**
-             * 表示 DisplayObject 实例相对于父级 DisplayObjectContainer 本地坐标的 y 坐标。
-             * 如果该对象位于具有变形的 DisplayObjectContainer 内，则它也位于包含 DisplayObjectContainer 的本地坐标系中。因此，对于逆时针旋转 90 度的 DisplayObjectContainer，该 DisplayObjectContainer 的子级将继承逆时针旋转 90 度的坐标系。
-             * @member {number} egret.DisplayObject#y
-             */
             this._y = 0;
-            /**
-             * 表示从注册点开始应用的对象的水平缩放比例（百分比）。
-             * 缩放本地坐标系统将更改 x 和 y 属性值，这些属性值是以整像素定义的。
-             * 默认值为 1，即不缩放。
-             * @member {number} egret.DisplayObject#scaleX
-             * @default 1
-             */
             this._scaleX = 1;
-            /**
-             * 表示从对象注册点开始应用的对象的垂直缩放比例（百分比）。
-             * 缩放本地坐标系统将更改 x 和 y 属性值，这些属性值是以整像素定义的。
-             * 默认值为 1，即不缩放。
-             * @member {number} egret.DisplayObject#scaleY
-             * @default 1
-             */
             this._scaleY = 1;
-            /**
-             * 表示从对象绝对锚点X。
-             * @member {number} egret.DisplayObject#anchorOffsetX
-             * @default 0
-             */
             this._anchorOffsetX = 0;
-            /**
-             * 表示从对象绝对锚点Y。
-             * @member {number} egret.DisplayObject#anchorOffsetY
-             * @default 0
-             */
             this._anchorOffsetY = 0;
-            /**
-             * 表示从对象相对锚点X。
-             * @member {number} egret.DisplayObject#anchorX
-             * @default 0
-             */
             this._anchorX = 0;
-            /**
-             * 表示从对象相对锚点Y。
-             * @member {number} egret.DisplayObject#anchorY
-             * @default 0
-             */
             this._anchorY = 0;
-            /**
-             * 显示对象是否可见。
-             * 不可见的显示对象已被禁用。例如，如果实例的 visible=false，则无法单击该对象。
-             * 默认值为 true 可见
-             * @member {boolean} egret.DisplayObject#visible
-             */
             this._visible = true;
-            /**
-             * 表示 DisplayObject 实例距其原始方向的旋转程度，以度为单位。
-             * 从 0 到 180 的值表示顺时针方向旋转；从 0 到 -180 的值表示逆时针方向旋转。对于此范围之外的值，可以通过加上或减去 360 获得该范围内的值。例如，my_video.rotation = 450语句与 my_video.rotation = 90 是相同的。
-             * @member {number} egret.DisplayObject#rotation
-             * @default 0 默认值为 0 不旋转。
-             */
             this._rotation = 0;
-            /**
-             * 表示指定对象的 Alpha 透明度值。
-             * 有效值为 0（完全透明）到 1（完全不透明）。alpha 设置为 0 的显示对象是活动的，即使它们不可见。
-             * @member {number} egret.DisplayObject#alpha
-             *  @default 1 默认值为 1。
-             */
             this._alpha = 1;
-            /**
-             * 表示DisplayObject的x方向斜切
-             * @member {number} egret.DisplayObject#skewX
-             * @default 0
-             */
             this._skewX = 0;
-            /**
-             * 表示DisplayObject的y方向斜切
-             * @member {number} egret.DisplayObject#skewY
-             * @default 0
-             */
             this._skewY = 0;
-            /**
-             * 指定此对象是否接收鼠标/触摸事件
-             * @member {boolean} egret.DisplayObject#touchEnabled
-             * @default false 默认为 false 即不可以接收。
-             */
             this._touchEnabled = false;
             /**
              * BlendMode 类中的一个值，用于指定要使用的混合模式。
@@ -155,11 +92,9 @@ var egret;
              * @member {string} egret.DisplayObject#blendMode
              */
             this.blendMode = null;
-            /**
-             * 显示对象的滚动矩形范围。显示对象被裁切为矩形定义的大小，当您更改 scrollRect 对象的 x 和 y 属性时，它会在矩形内滚动。
-             *  @member {egret.Rectangle} egret.DisplayObject#scrollRect
-             */
             this._scrollRect = null;
+            this._explicitWidth = NaN;
+            this._explicitHeight = NaN;
             this._hasWidthSet = false;
             this._hasHeightSet = false;
             /**
@@ -169,16 +104,32 @@ var egret;
              */
             this.mask = null;
             this._worldBounds = null;
+            /**
+             * @private
+             */
             this.worldAlpha = 1;
+            this._isContainer = false;
+            /**
+             * 强制每帧执行_draw函数
+             * @public
+             * @member {string} egret.DisplayObject#blendMode
+             */
+            this.needDraw = false;
+            this._hitTestPointTexture = null;
             this._rectW = 0;
             this._rectH = 0;
             this._stage = null;
             this._cacheAsBitmap = false;
+            this.renderTexture = null;
             this._cacheDirty = false;
             /**
              * beta功能，请勿调用此方法
              */
             this._colorTransform = null;
+            /**
+             * beta功能，请勿调用此方法
+             */
+            this._filter = null;
             this._worldTransform = new egret.Matrix();
             this._worldBounds = new egret.Rectangle(0, 0, 0, 0);
             this._cacheBounds = new egret.Rectangle(0, 0, 0, 0);
@@ -203,6 +154,15 @@ var egret;
             this._setDirty();
             this._setCacheDirty();
             this._setParentSizeDirty();
+            if (this._sizeChangeCallBack != null) {
+                if (this._sizeChangeCallTarget == this._parent) {
+                    this._sizeChangeCallBack.call(this._sizeChangeCallTarget);
+                }
+                else {
+                    this._sizeChangeCallBack = null;
+                    this._sizeChangeCallTarget = null;
+                }
+            }
         };
         DisplayObject.prototype._clearDirty = function () {
             //todo 这个除了文本的，其他都没有clear过
@@ -214,7 +174,7 @@ var egret;
         };
         Object.defineProperty(DisplayObject.prototype, "parent", {
             /**
-             * 表示包含此显示对象的 DisplayObjectContainer 对象。【只读】
+             * 表示包含此显示对象的 DisplayObjectContainer 对象。
              * 使用 parent 属性可以指定高于显示列表层次结构中当前显示对象的显示对象的相对路径。
              * @member {egret.DisplayObjectContainer} egret.DisplayObject#parent
              */
@@ -228,6 +188,11 @@ var egret;
             this._parent = parent;
         };
         Object.defineProperty(DisplayObject.prototype, "x", {
+            /**
+             * 表示 DisplayObject 实例相对于父级 DisplayObjectContainer 本地坐标的 x 坐标。
+             * 如果该对象位于具有变形的 DisplayObjectContainer 内，则它也位于包含 DisplayObjectContainer 的本地坐标系中。因此，对于逆时针旋转 90 度的 DisplayObjectContainer，该 DisplayObjectContainer 的子级将继承逆时针旋转 90 度的坐标系。
+             * @member {number} egret.DisplayObject#x
+             */
             get: function () {
                 return this._x;
             },
@@ -245,6 +210,11 @@ var egret;
             }
         };
         Object.defineProperty(DisplayObject.prototype, "y", {
+            /**
+             * 表示 DisplayObject 实例相对于父级 DisplayObjectContainer 本地坐标的 y 坐标。
+             * 如果该对象位于具有变形的 DisplayObjectContainer 内，则它也位于包含 DisplayObjectContainer 的本地坐标系中。因此，对于逆时针旋转 90 度的 DisplayObjectContainer，该 DisplayObjectContainer 的子级将继承逆时针旋转 90 度的坐标系。
+             * @member {number} egret.DisplayObject#y
+             */
             get: function () {
                 return this._y;
             },
@@ -262,6 +232,13 @@ var egret;
             }
         };
         Object.defineProperty(DisplayObject.prototype, "scaleX", {
+            /**
+             * 表示从注册点开始应用的对象的水平缩放比例（百分比）。
+             * 缩放本地坐标系统将更改 x 和 y 属性值，这些属性值是以整像素定义的。
+             * 默认值为 1，即不缩放。
+             * @member {number} egret.DisplayObject#scaleX
+             * @default 1
+             */
             get: function () {
                 return this._scaleX;
             },
@@ -276,6 +253,13 @@ var egret;
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "scaleY", {
+            /**
+             * 表示从对象注册点开始应用的对象的垂直缩放比例（百分比）。
+             * 缩放本地坐标系统将更改 x 和 y 属性值，这些属性值是以整像素定义的。
+             * 默认值为 1，即不缩放。
+             * @member {number} egret.DisplayObject#scaleY
+             * @default 1
+             */
             get: function () {
                 return this._scaleY;
             },
@@ -290,6 +274,11 @@ var egret;
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "anchorOffsetX", {
+            /**
+             * 表示从对象绝对锚点X。
+             * @member {number} egret.DisplayObject#anchorOffsetX
+             * @default 0
+             */
             get: function () {
                 return this._anchorOffsetX;
             },
@@ -304,6 +293,11 @@ var egret;
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "anchorOffsetY", {
+            /**
+             * 表示从对象绝对锚点Y。
+             * @member {number} egret.DisplayObject#anchorOffsetY
+             * @default 0
+             */
             get: function () {
                 return this._anchorOffsetY;
             },
@@ -318,6 +312,11 @@ var egret;
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "anchorX", {
+            /**
+             * 表示从对象相对锚点X。
+             * @member {number} egret.DisplayObject#anchorX
+             * @default 0
+             */
             get: function () {
                 return this._anchorX;
             },
@@ -335,6 +334,11 @@ var egret;
             }
         };
         Object.defineProperty(DisplayObject.prototype, "anchorY", {
+            /**
+             * 表示从对象相对锚点Y。
+             * @member {number} egret.DisplayObject#anchorY
+             * @default 0
+             */
             get: function () {
                 return this._anchorY;
             },
@@ -352,6 +356,12 @@ var egret;
             }
         };
         Object.defineProperty(DisplayObject.prototype, "visible", {
+            /**
+             * 显示对象是否可见。
+             * 不可见的显示对象已被禁用。例如，如果实例的 visible=false，则无法单击该对象。
+             * 默认值为 true 可见
+             * @member {boolean} egret.DisplayObject#visible
+             */
             get: function () {
                 return this._visible;
             },
@@ -368,19 +378,32 @@ var egret;
             }
         };
         Object.defineProperty(DisplayObject.prototype, "rotation", {
+            /**
+             * 表示 DisplayObject 实例距其原始方向的旋转程度，以度为单位。
+             * 从 0 到 180 的值表示顺时针方向旋转；从 0 到 -180 的值表示逆时针方向旋转。对于此范围之外的值，可以通过加上或减去 360 获得该范围内的值。例如，my_video.rotation = 450语句与 my_video.rotation = 90 是相同的。
+             * @member {number} egret.DisplayObject#rotation
+             * @default 0 默认值为 0 不旋转。
+             */
             get: function () {
                 return this._rotation;
             },
             set: function (value) {
                 if (egret.NumberUtils.isNumber(value) && this._rotation != value) {
                     this._rotation = value;
-                    this._setSizeDirty();
+                    this._setDirty();
+                    this._setParentSizeDirty();
                 }
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "alpha", {
+            /**
+             * 表示指定对象的 Alpha 透明度值。
+             * 有效值为 0（完全透明）到 1（完全不透明）。alpha 设置为 0 的显示对象是活动的，即使它们不可见。
+             * @member {number} egret.DisplayObject#alpha
+             *  @default 1 默认值为 1。
+             */
             get: function () {
                 return this._alpha;
             },
@@ -395,32 +418,49 @@ var egret;
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "skewX", {
+            /**
+             * 表示DisplayObject的x方向斜切
+             * @member {number} egret.DisplayObject#skewX
+             * @default 0
+             */
             get: function () {
                 return this._skewX;
             },
             set: function (value) {
                 if (egret.NumberUtils.isNumber(value) && this._skewX != value) {
                     this._skewX = value;
-                    this._setSizeDirty();
+                    this._setDirty();
+                    this._setParentSizeDirty();
                 }
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "skewY", {
+            /**
+             * 表示DisplayObject的y方向斜切
+             * @member {number} egret.DisplayObject#skewY
+             * @default 0
+             */
             get: function () {
                 return this._skewY;
             },
             set: function (value) {
                 if (egret.NumberUtils.isNumber(value) && this._skewY != value) {
                     this._skewY = value;
-                    this._setSizeDirty();
+                    this._setDirty();
+                    this._setParentSizeDirty();
                 }
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "touchEnabled", {
+            /**
+             * 指定此对象是否接收鼠标/触摸事件
+             * @member {boolean} egret.DisplayObject#touchEnabled
+             * @default false 默认为 false 即不可以接收。
+             */
             get: function () {
                 return this._touchEnabled;
             },
@@ -434,6 +474,10 @@ var egret;
             this._touchEnabled = value;
         };
         Object.defineProperty(DisplayObject.prototype, "scrollRect", {
+            /**
+             * 显示对象的滚动矩形范围。显示对象被裁切为矩形定义的大小，当您更改 scrollRect 对象的 x 和 y 属性时，它会在矩形内滚动。
+             *  @member {egret.Rectangle} egret.DisplayObject#scrollRect
+             */
             get: function () {
                 return this._scrollRect;
             },
@@ -451,6 +495,7 @@ var egret;
             /**
              * 测量宽度
              * @returns {number}
+             * @member {egret.Rectangle} egret.DisplayObject#measuredWidth
              */
             get: function () {
                 return this._measureBounds().width;
@@ -462,6 +507,7 @@ var egret;
             /**
              * 测量高度
              * @returns {number}
+             * @member {egret.Rectangle} egret.DisplayObject#measuredWidth
              */
             get: function () {
                 return this._measureBounds().height;
@@ -470,6 +516,10 @@ var egret;
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "explicitWidth", {
+            /**
+             * 显式设置宽度
+             * @returns {number}
+             */
             get: function () {
                 return this._explicitWidth;
             },
@@ -477,6 +527,10 @@ var egret;
             configurable: true
         });
         Object.defineProperty(DisplayObject.prototype, "explicitHeight", {
+            /**
+             * 显式设置高度
+             * @returns {number}
+             */
             get: function () {
                 return this._explicitHeight;
             },
@@ -491,18 +545,17 @@ var egret;
              * @returns {number}
              */
             get: function () {
-                return this._getSize(egret.Rectangle.identity).width;
+                return this._getWidth();
             },
-            /**
-             * 显式设置宽度
-             * @param value
-             */
             set: function (value) {
                 this._setWidth(value);
             },
             enumerable: true,
             configurable: true
         });
+        DisplayObject.prototype._getWidth = function () {
+            return this._getSize(egret.Rectangle.identity).width;
+        };
         Object.defineProperty(DisplayObject.prototype, "height", {
             /**
              * 表示显示对象的高度，以像素为单位。
@@ -511,18 +564,17 @@ var egret;
              * @returns {number}
              */
             get: function () {
-                return this._getSize(egret.Rectangle.identity).height;
+                return this._getHeight();
             },
-            /**
-             * 显式设置高度
-             * @param value
-             */
             set: function (value) {
                 this._setHeight(value);
             },
             enumerable: true,
             configurable: true
         });
+        DisplayObject.prototype._getHeight = function () {
+            return this._getSize(egret.Rectangle.identity).height;
+        };
         /**
          * @inheritDoc
          */
@@ -546,39 +598,77 @@ var egret;
          * @param renderContext
          */
         DisplayObject.prototype._draw = function (renderContext) {
-            if (!this._visible) {
-                this.destroyCacheBounds();
-                return;
-            }
-            var hasDrawCache = this.drawCacheTexture(renderContext);
-            if (hasDrawCache) {
-                this.destroyCacheBounds();
-                return;
-            }
             var o = this;
-            if (o._colorTransform) {
+            if (!o._visible) {
+                o.destroyCacheBounds();
+                return;
+            }
+            var hasDrawCache = o.drawCacheTexture(renderContext);
+            if (hasDrawCache) {
+                o.destroyCacheBounds();
+                return;
+            }
+            var isCommandPush = egret.MainContext.__use_new_draw && o._isContainer;
+            if (o._filter && !isCommandPush) {
+                renderContext.setGlobalFilter(o._filter);
+            }
+            if (o._colorTransform && !isCommandPush) {
                 renderContext.setGlobalColorTransform(o._colorTransform.matrix);
             }
             renderContext.setAlpha(o.worldAlpha, o.blendMode);
             renderContext.setTransform(o._worldTransform);
             var mask = o.mask || o._scrollRect;
+            if (mask && !isCommandPush) {
+                renderContext.pushMask(mask);
+            }
+            o._render(renderContext);
+            if (mask && !isCommandPush) {
+                renderContext.popMask();
+            }
+            if (o._colorTransform && !isCommandPush) {
+                renderContext.setGlobalColorTransform(null);
+            }
+            if (o._filter && !isCommandPush) {
+                renderContext.setGlobalFilter(null);
+            }
+            o.destroyCacheBounds();
+        };
+        DisplayObject.prototype._setGlobalFilter = function (renderContext) {
+            var o = this;
+            renderContext.setGlobalFilter(o._filter);
+        };
+        DisplayObject.prototype._removeGlobalFilter = function (renderContext) {
+            renderContext.setGlobalFilter(null);
+        };
+        DisplayObject.prototype._setGlobalColorTransform = function (renderContext) {
+            var o = this;
+            renderContext.setGlobalColorTransform(o._colorTransform.matrix);
+        };
+        DisplayObject.prototype._removeGlobalColorTransform = function (renderContext) {
+            renderContext.setGlobalColorTransform(null);
+        };
+        DisplayObject.prototype._pushMask = function (renderContext) {
+            var o = this;
+            renderContext.setTransform(o._worldTransform);
+            var mask = o.mask || o._scrollRect;
             if (mask) {
                 renderContext.pushMask(mask);
             }
-            this._render(renderContext);
-            if (mask) {
-                renderContext.popMask();
-            }
-            if (o._colorTransform) {
-                renderContext.setGlobalColorTransform(null);
-            }
-            this.destroyCacheBounds();
         };
+        DisplayObject.prototype._popMask = function (renderContext) {
+            renderContext.popMask();
+        };
+        /**
+         * @private
+         */
         DisplayObject.prototype.drawCacheTexture = function (renderContext) {
             var display = this;
-            if (display._cacheAsBitmap == false)
+            if (display._cacheAsBitmap == false) {
                 return false;
-            if (display._cacheDirty || display._texture_to_render == null || Math.round(display.width) != Math.round(display._texture_to_render._sourceWidth) || Math.round(display.height) != Math.round(display._texture_to_render._sourceHeight)) {
+            }
+            var bounds = display.getBounds(egret.Rectangle.identity);
+            var texture_scale_factor = egret.MainContext.instance.rendererContext._texture_scale_factor;
+            if (display._cacheDirty || display._texture_to_render == null || Math.round(bounds.width) != Math.round(display._texture_to_render._sourceWidth * texture_scale_factor) || Math.round(bounds.height) != Math.round(display._texture_to_render._sourceHeight * texture_scale_factor)) {
                 var cached = display._makeBitmapCache();
                 display._cacheDirty = !cached;
             }
@@ -593,9 +683,8 @@ var egret;
             display._updateTransform();
             renderContext.setAlpha(display.worldAlpha, display.blendMode);
             renderContext.setTransform(display._worldTransform);
-            var scale_factor = egret.MainContext.instance.rendererContext.texture_scale_factor;
             var renderFilter = egret.RenderFilter.getInstance();
-            renderFilter.drawImage(renderContext, display, 0, 0, width * scale_factor, height * scale_factor, offsetX, offsetY, width, height);
+            renderFilter.drawImage(renderContext, display, 0, 0, width, height, offsetX, offsetY, width, height);
             return true;
         };
         /**
@@ -603,7 +692,16 @@ var egret;
          * @param renderContext
          */
         DisplayObject.prototype._updateTransform = function () {
-            this._calculateWorldTransform();
+            var o = this;
+            if (!o._visible) {
+                return;
+            }
+            o._calculateWorldTransform();
+            if (egret.MainContext._renderLoopPhase == "updateTransform") {
+                if (o.needDraw || o._texture_to_render || o._cacheAsBitmap) {
+                    egret.RenderCommand.push(o._draw, o);
+                }
+            }
         };
         /**
          * 计算全局数据
@@ -687,12 +785,16 @@ var egret;
                 else {
                     matrix.prependTransform(o._x, o._y, o._scaleX, o._scaleY, o._rotation, o._skewX, o._skewY, o._anchorOffsetX, o._anchorOffsetY);
                 }
+                if (o._scrollRect) {
+                    matrix.prepend(1, 0, 0, 1, -o._scrollRect.x, -o._scrollRect.y);
+                }
                 o = o._parent;
             }
             return matrix;
         };
         /**
          * 将 point 对象从显示对象的（本地）坐标转换为舞台（全局）坐标。
+         * 此方法允许您将任何给定的 x 和 y 坐标从相对于特定显示对象原点 (0,0) 的值（本地坐标）转换为相对于舞台原点的值（全局坐标）。
          * @method egret.DisplayObject#localToGlobal
          * @param x {number} 本地x坐标
          * @param y {number} 本地y坐标
@@ -737,7 +839,7 @@ var egret;
          * @method egret.DisplayObject#hitTest
          * @param x {number} 检测坐标的x轴
          * @param y {number} 检测坐标的y轴
-         * @param ignoreTouchEnabled {boolean} 是否忽略TouchEnabled
+         * @param ignoreTouchEnabled {boolean} 是否忽略 touchEnabled 属性
          * @returns {*}
          */
         DisplayObject.prototype.hitTest = function (x, y, ignoreTouchEnabled) {
@@ -745,7 +847,9 @@ var egret;
             if (!this._visible || (!ignoreTouchEnabled && !this._touchEnabled)) {
                 return null;
             }
-            var bound = this._getSize(egret.Rectangle.identity);
+            var bound = this.getBounds(egret.Rectangle.identity, false);
+            x -= bound.x;
+            y -= bound.y;
             if (0 <= x && x < bound.width && 0 <= y && y < bound.height) {
                 if (this.mask || this._scrollRect) {
                     if (this._scrollRect && x > this._scrollRect.x && y > this._scrollRect.y && x < this._scrollRect.x + this._scrollRect.width && y < this._scrollRect.y + this._scrollRect.height) {
@@ -809,9 +913,17 @@ var egret;
         };
         DisplayObject.prototype._getSize = function (resultRect) {
             if (this._hasHeightSet && this._hasWidthSet) {
+                this._clearSizeDirty();
                 return resultRect.initialize(0, 0, this._explicitWidth, this._explicitHeight);
             }
-            return this._measureSize(resultRect);
+            this._measureSize(resultRect);
+            if (this._hasWidthSet) {
+                resultRect.width = this._explicitWidth;
+            }
+            if (this._hasHeightSet) {
+                resultRect.height = this._explicitHeight;
+            }
+            return resultRect;
         };
         /**
          * 测量显示对象坐标与大小
@@ -862,7 +974,7 @@ var egret;
         };
         Object.defineProperty(DisplayObject.prototype, "stage", {
             /**
-             * 显示对象的舞台。【只读】
+             * 显示对象的舞台。
              * 例如，您可以创建多个显示对象并加载到显示列表中，每个显示对象的 stage 属性是指相同的 Stage 对象。
              * 如果显示对象未添加到显示列表，则其 stage 属性会设置为 null。
              * @member {number} egret.DisplayObject#stage
@@ -951,6 +1063,12 @@ var egret;
             return false;
         };
         Object.defineProperty(DisplayObject.prototype, "cacheAsBitmap", {
+            /**
+             * 如果设置为 true，则 egret 运行时将缓存显示对象的内部位图表示形式。此缓存可以提高包含复杂矢量内容的显示对象的性能。
+             * 具有已缓存位图的显示对象的所有矢量数据都将被绘制到位图而不是主显示。像素按一对一与父对象进行映射。如果位图的边界发生更改，则将重新创建位图而不会拉伸它。
+             * 除非将 cacheAsBitmap 属性设置为 true，否则不会创建内部位图。
+             * @member {number} egret.DisplayObject#cacheAsBitmap
+             */
             get: function () {
                 return this._cacheAsBitmap;
             },
@@ -1043,6 +1161,16 @@ var egret;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(DisplayObject.prototype, "filter", {
+            get: function () {
+                return this._filter;
+            },
+            set: function (value) {
+                this._filter = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * @private
          * @returns {Matrix}
@@ -1054,6 +1182,9 @@ var egret;
     })(egret.EventDispatcher);
     egret.DisplayObject = DisplayObject;
     DisplayObject.prototype.__class__ = "egret.DisplayObject";
+    /**
+     * @private
+     */
     var ColorTransform = (function () {
         function ColorTransform() {
             this.matrix = null;

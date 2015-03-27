@@ -32,16 +32,66 @@ var egret;
         NumberUtils.isNumber = function (value) {
             return typeof (value) === "number" && !isNaN(value);
         };
+        /**
+         * 得到对应角度值的sin近似值
+         * @param value {number} 角度值
+         * @returns {number} sin值
+         */
+        NumberUtils.sin = function (value) {
+            value = Math.round(value);
+            value = value % 360;
+            if (value < 0) {
+                value += 360;
+            }
+            if (value < 90) {
+                return egret_sin_map[value];
+            }
+            if (value < 180) {
+                return egret_cos_map[value - 90];
+            }
+            if (value < 270) {
+                return -egret_sin_map[value - 180];
+            }
+            return -egret_cos_map[value - 270];
+        };
+        /**
+         * 得到对应角度值的cos近似值
+         * @param value {number} 角度值
+         * @returns {number} cos值
+         */
+        NumberUtils.cos = function (value) {
+            value = Math.round(value);
+            value = value % 360;
+            if (value < 0) {
+                value += 360;
+            }
+            if (value < 90) {
+                return egret_cos_map[value];
+            }
+            if (value < 180) {
+                return -egret_sin_map[value - 90];
+            }
+            if (value < 270) {
+                return -egret_cos_map[value - 180];
+            }
+            return egret_sin_map[value - 270];
+        };
         return NumberUtils;
     })();
     egret.NumberUtils = NumberUtils;
     NumberUtils.prototype.__class__ = "egret.NumberUtils";
 })(egret || (egret = {}));
+var egret_sin_map = {};
+var egret_cos_map = {};
+for (var i = 0; i <= 90; i++) {
+    egret_sin_map[i] = Math.sin(i * egret.Matrix.DEG_TO_RAD);
+    egret_cos_map[i] = Math.cos(i * egret.Matrix.DEG_TO_RAD);
+}
 //对未提供bind的浏览器实现bind机制
 if (!Function.prototype.bind) {
     Function.prototype.bind = function (oThis) {
         if (typeof this !== "function") {
-            throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+            throw new TypeError(egret.getString(1029));
         }
         var aArgs = Array.prototype.slice.call(arguments, 1), fToBind = this, fNOP = function () {
         }, fBound = function () {

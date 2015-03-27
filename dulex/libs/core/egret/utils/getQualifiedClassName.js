@@ -35,7 +35,7 @@ var egret;
      *  egret.getQualifiedClassName(egret.DisplayObject) //返回 "egret.DisplayObject"
      */
     function getQualifiedClassName(value) {
-        var prototype = value.prototype ? value.prototype : value.__proto__;
+        var prototype = value.prototype ? value.prototype : Object.getPrototypeOf(value);
         if (prototype.hasOwnProperty("__class__")) {
             return prototype["__class__"];
         }
@@ -59,7 +59,7 @@ var egret;
     *  egret.getQualifiedSuperclassName(egret.DisplayObjectContainer) //返回 "egret.DisplayObject"
     */
     function getQualifiedSuperclassName(value) {
-        var prototype = value.prototype ? value.prototype : value.__proto__;
+        var prototype = value.prototype ? value.prototype : Object.getPrototypeOf(value);
         if (prototype.hasOwnProperty("__superclass__")) {
             return prototype["__superclass__"];
         }
